@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<objects>
+<!-- ('', 'zport', 'dmd', 'Events', 'Status', 'Web') -->
+<object id='/zport/dmd/Events/Status/Web' module='Products.ZenEvents.EventClass' class='EventClass'>
+</object>
+</objects>
