@@ -135,9 +135,9 @@ class HttpMonitorDataSource(ZenPackPersistence, RRDDataSource.RRDDataSource):
 
 
     def addDataPoints(self):
-        if not hasattr(self.datapoints, 'time'):
+        if not self.datapoints._getOb('time', None):
             self.manage_addRRDDataPoint('time')
-        if not hasattr(self.datapoints, 'size'):
+        if not self.datapoints._getOb('size', None):
             self.manage_addRRDDataPoint('size')
 
 
