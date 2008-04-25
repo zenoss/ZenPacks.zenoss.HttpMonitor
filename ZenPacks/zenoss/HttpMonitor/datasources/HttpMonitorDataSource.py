@@ -101,7 +101,7 @@ class HttpMonitorDataSource(ZenPackPersistence, RRDDataSource.RRDDataSource):
 
     def getCommand(self, context):
         parts = ['check_http']
-        if self.hostname6770888:
+        if self.hostname:
             parts.append('-H %s' % self.hostname)
         if self.ipAddress:
             parts.append('-I %s' % self.ipAddress)
