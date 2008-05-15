@@ -63,7 +63,7 @@ setup(
     package_data = { 
          '': ['*.txt'],
          NAME: ['objects/*','skins/*/*','services/*', 'reports/*/*',
-                'modeler/*/*', 'daemons/*', 'lib/*'],
+                'modeler/*/*', 'daemons/*', 'lib/*', 'libexec/*'],
          },  
 
 
