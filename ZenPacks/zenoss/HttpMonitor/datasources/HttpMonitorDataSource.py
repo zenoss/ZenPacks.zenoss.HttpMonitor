@@ -20,6 +20,7 @@ import Products.ZenModel.RRDDataSource as RRDDataSource
 from Products.ZenModel.ZenPackPersistence import ZenPackPersistence
 from AccessControl import ClassSecurityInfo, Permissions
 from Products.ZenUtils.ZenTales import talesCompile, getEngine
+from Products.ZenUtils.Utils import binPath
 
 
 class HttpMonitorDataSource(ZenPackPersistence, RRDDataSource.RRDDataSource):
@@ -100,7 +101,7 @@ class HttpMonitorDataSource(ZenPackPersistence, RRDDataSource.RRDDataSource):
 
 
     def getCommand(self, context):
-        parts = ['check_http']
+        parts = [binPath('check_http')]
         if self.hostname:
             parts.append('-H %s' % self.hostname)
         if self.ipAddress:
@@ -125,8 +126,7 @@ class HttpMonitorDataSource(ZenPackPersistence, RRDDataSource.RRDDataSource):
         if self.onRedirect:
             parts.append('-f %s' % self.onRedirect) 
         cmd = ' '.join(parts)
-        cmd = '$ZENHOME/libexec/' + \
-                    RRDDataSource.RRDDataSource.getCommand(self, context, cmd)
+        cmd = RRDDataSource.RRDDataSource.getCommand(self, context, cmd)
         return cmd
 
 
