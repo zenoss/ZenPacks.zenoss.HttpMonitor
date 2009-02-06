@@ -17,7 +17,7 @@ from Products.ZenModel.ZenPack import ZenPack
 import logging
 
 class BaseClass:
-    version = Version(1, 0, 0)
+    version = Version(2, 0, 0)
 
     def migrate(self, pack):
         if pack.__class__ != ZenPack:
