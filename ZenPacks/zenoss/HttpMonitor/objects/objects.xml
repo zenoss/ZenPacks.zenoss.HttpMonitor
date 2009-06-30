@@ -6,7 +6,10 @@
 Put devices in this class to monitor them for Ping, DNS forward lookups, and basic HTTP requests against a web server's root.
 </property>
 <property visible="True" type="lines" id="zDeviceTemplates" >
-['DnsMonitor', 'HttpMonitor']
+['Device', 'HttpMonitor']
+</property>
+<property visible="True" type="boolean" id="zSnmpMonitorIgnore" >
+True
 </property>
 </object>
 <!-- ('', 'zport', 'dmd', 'Devices', 'rrdTemplates', 'HttpMonitor') -->
