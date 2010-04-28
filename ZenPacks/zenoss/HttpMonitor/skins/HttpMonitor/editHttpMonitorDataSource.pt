@@ -132,13 +132,13 @@
         <tr>
             <td class="tableheader">Use SSL</td>
             <td class="tablevalues" tal:condition="editable">
-            <input class="tablevalues" type="checkbox" name="useSsl:boolean" size="10"
-                tal:attributes="checked here/useSsl" />
-            </td>
-          <td class="tablevalues" tal:condition="not:editable">
-	 		<tal:block tal:condition="here/useSsl">Yes</tal:block>
-	 		<tal:block tal:condition="not:here/useSsl">No</tal:block>
-		  </td>
+            <select class="tablevalues" name="useSsl:boolean">
+            <option tal:repeat="e python:(True,False)" tal:content="e"
+                    tal:attributes="value e; selected python:e==here.useSsl"/>
+            </select>
+	    </td>
+            <td class="tablevalues" tal:condition="not:editable" 
+                tal:content="here/useSsl"/>
         </tr>
         <tr>
             <td class="tableheader">Url</td>
@@ -161,24 +161,24 @@
         <tr>
             <td class="tableheader">Case Sensitive</td>
             <td class="tablevalues" tal:condition="editable">
-            <input class="tablevalues" type="checkbox" name="caseSensitive:boolean" size="10"
-                tal:attributes="checked here/caseSensitive" />
-            </td>
-          <td class="tablevalues" tal:condition="not:editable">
-	 		<tal:block tal:condition="here/caseSensitive">Yes</tal:block>
-	 		<tal:block tal:condition="not:here/caseSensitive">No</tal:block>
-		  </td>
+            <select class="tablevalues" name="caseSensitive:boolean">
+            <option tal:repeat="e python:(True,False)" tal:content="e"
+                    tal:attributes="value e; selected python:e==here.caseSensitive"/>
+            </select>
+	    </td>
+            <td class="tablevalues" tal:condition="not:editable" 
+                tal:content="here/caseSensitive"/>
         </tr>
         <tr>
             <td class="tableheader">Invert Expression</td>
             <td class="tablevalues" tal:condition="editable">
-            <input class="tablevalues" type="checkbox" name="invert:boolean" size="10"
-                tal:attributes="checked here/invert" />
-            </td>
-          <td class="tablevalues" tal:condition="not:editable">
-	 		<tal:block tal:condition="here/invert">Yes</tal:block>
-	 		<tal:block tal:condition="not:here/invert">No</tal:block>
-		  </td>
+            <select class="tablevalues" name="invert:boolean">
+            <option tal:repeat="e python:(True,False)" tal:content="e"
+                    tal:attributes="value e; selected python:e==here.invert"/>
+            </select>
+	    </td>
+            <td class="tablevalues" tal:condition="not:editable" 
+                tal:content="here/invert"/>
         </tr>
         <tr>
             <td class="tableheader">Basic Auth User</td>
