@@ -63,6 +63,9 @@ follow
 </property>
 <tomanycont id='datapoints'>
 <object id='size' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+The size of the page hit.
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
@@ -71,6 +74,9 @@ True
 </property>
 </object>
 <object id='time' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+The amount of time the server takes to respond.
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
