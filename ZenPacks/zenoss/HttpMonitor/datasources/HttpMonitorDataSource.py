@@ -116,9 +116,9 @@ class HttpMonitorDataSource(ZenPackPersistence, RRDDataSource.RRDDataSource):
             parts.append('-u %s' % self.url)
         if self.regex:
             if self.caseSensitive:
-                parts.append('-r %s' % self.regex)
+                parts.append("-r '%s'" % self.regex)
             else:
-                parts.append('-R %s' % self.regex)
+                parts.append("-R '%s'" % self.regex)
             if self.invert:
                 parts.append('--invert-regex')
         if self.basicAuthUser or self.basicAuthPass:
