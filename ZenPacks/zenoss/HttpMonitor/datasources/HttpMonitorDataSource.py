@@ -19,7 +19,6 @@ Defines datasource for HttpMonitor
 import Products.ZenModel.RRDDataSource as RRDDataSource
 from Products.ZenModel.ZenPackPersistence import ZenPackPersistence
 from AccessControl import ClassSecurityInfo, Permissions
-from Products.ZenUtils.ZenTales import talesCompile, getEngine
 from Products.ZenUtils.Utils import binPath
 
 
@@ -49,6 +48,9 @@ class HttpMonitorDataSource(ZenPackPersistence, RRDDataSource.RRDDataSource):
 
     onRedirectOptions = ('ok', 'warning', 'critical', 'follow')
 
+    proxyAuthUser = ''
+    proxyAuthPassword = ''
+
     _properties = RRDDataSource.RRDDataSource._properties + (
         {'id':'hostname', 'type':'string', 'mode':'w'},
         {'id':'ipAddress', 'type':'string', 'mode':'w'},
@@ -62,6 +64,8 @@ class HttpMonitorDataSource(ZenPackPersistence, RRDDataSource.RRDDataSource):
         {'id':'basicAuthPass', 'type':'string', 'mode':'w'},
         {'id':'onRedirect', 'type':'string', 'mode':'w'},
         {'id':'timeout', 'type':'int', 'mode':'w'},
+        {'id':'proxyAuthUser', 'type':'string', 'mode':'w'},
+        {'id':'proxyAuthPassword', 'type':'string', 'mode':'w'},
         )
         
     _relations = RRDDataSource.RRDDataSource._relations + (
@@ -125,6 +129,10 @@ class HttpMonitorDataSource(ZenPackPersistence, RRDDataSource.RRDDataSource):
             parts.append('-a %s:%s' % (self.basicAuthUser, self.basicAuthPass))
         if self.onRedirect:
             parts.append('-f %s' % self.onRedirect) 
+
+        if self.proxyAuthUser and self.proxyAuthPassword:
+            parts.append("-b '%s:%s'" % (self.proxyAuthUser, self.proxyAuthPassword)) 
+
         cmd = ' '.join(parts)
         cmd = RRDDataSource.RRDDataSource.getCommand(self, context, cmd)
         return cmd

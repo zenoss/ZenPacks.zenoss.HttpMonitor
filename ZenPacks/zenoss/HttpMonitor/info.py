@@ -36,6 +36,9 @@ class HttpMonitorDataSourceInfo(RRDDataSourceInfo):
     basicAuthUser = ProxyProperty('basicAuthUser')
     basicAuthPass = ProxyProperty('basicAuthPass')
     onRedirect = ProxyProperty('onRedirect')
+
+    proxyAuthUser = ProxyProperty('proxyAuthUser')
+    proxyAuthPassword = ProxyProperty('proxyAuthPassword')
     
     @property
     def testable(self):
@@ -43,6 +46,4 @@ class HttpMonitorDataSourceInfo(RRDDataSourceInfo):
         We can NOT test this datsource against a specific device
         """
         return False
-    
-
 
