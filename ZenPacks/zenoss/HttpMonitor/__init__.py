@@ -21,7 +21,8 @@ if os.path.isdir(skinsDir):
 
 def onCollectorInstalled(ob, event):
     zpFriendly = 'HttpMonitor'
-    errormsg = '{0} binary cannot be found on {1}. It must be installed before {2} can function.'
+    errormsg = '{0} binary cannot be found on {1}. This is part of the nagios-plugins ' + \
+               'dependency, and must be installed before {2} can function.'
     
     verifyBin = 'check_http'
     code, output = ob.executeCommand('zenbincheck %s' % verifyBin, 'zenoss', needsZenHome=True)
