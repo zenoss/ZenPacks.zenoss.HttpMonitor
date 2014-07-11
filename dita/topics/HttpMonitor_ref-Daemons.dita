@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE reference
+  PUBLIC "urn:pubid:zenoss.com:doctypes:dita:dtd:reference" "reference.dtd">
+<reference id="d33e539"><title>Daemons</title><refbody><section><table>
+      <tgroup cols="2">
+        <thead>
+          <row>
+            <entry>Type</entry>
+
+            <entry>Name</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry><p>Performance Collector</p></entry>
+
+            <entry><p>zencommand</p></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </table></section></refbody></reference>
