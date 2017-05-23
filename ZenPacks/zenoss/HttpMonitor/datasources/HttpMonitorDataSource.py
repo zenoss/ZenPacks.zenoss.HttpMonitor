@@ -43,7 +43,7 @@ class HttpMonitorDataSource(ZenPackPersistence, RRDDataSource.RRDDataSource):
     basicAuthPass = ''
     onRedirect = 'follow'
 
-    onRedirectOptions = ('ok', 'warning', 'critical', 'follow')
+    onRedirectOptions = ('ok', 'warning', 'critical', 'follow', 'sticky', 'stickyport')
 
     proxyAuthUser = ''
     proxyAuthPassword = ''
