@@ -77,7 +77,7 @@
             <select class="tablevalues" name="severity:int">
                <option tal:repeat="sev here/ZenEventManager/getSeverities"
                        tal:content="python:sev[0]"
-                       tal:attributes="selected python:sev[1]==here.severity; value python:sev[1]"/>
+                       tal:attributes="selected python:sev[0]==here.severity; value python:sev[0]"/>
             </select>
             </td>
           <td class="tablevalues" tal:condition="not:editable" 
