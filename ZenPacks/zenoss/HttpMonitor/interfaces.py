@@ -15,7 +15,7 @@ from Products.Zuul.utils import ZuulMessageFactory as _t
 
 class IHttpMonitorDataSourceInfo(IRRDDataSourceInfo):
     timeout = schema.Int(title=_t(u'Timeout (seconds)'))
-    cycletime = schema.Int(title=_t(u'Cycle Time (seconds)'))
+    cycletime = schema.TextLine(title=_t(u'Cycle Time (seconds)'))
     hostname = schema.TextLine(title=_t(u'Host Name'), group=_t('HTTP Monitor'))
     port = schema.Int(title=_t(u'Port'), group=_t('HTTP Monitor'))
     ipAddress = schema.TextLine(title=_t(u'IP Address or Proxy Address'), group=_t('HTTP Monitor'))
