@@ -49,12 +49,6 @@ False
 <property type="string" id="url" mode="w" >
 /
 </property>
-<property type="boolean" id="caseSensitive" mode="w" >
-False
-</property>
-<property type="boolean" id="invert" mode="w" >
-False
-</property>
 <property type="string" id="onRedirect" mode="w" >
 follow
 </property>
