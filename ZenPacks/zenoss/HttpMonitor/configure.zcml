@@ -6,7 +6,5 @@
            for=".datasources.HttpMonitorDataSource.HttpMonitorDataSource"
            provides=".interfaces.IHttpMonitorDataSourceInfo"
            />
-  <utility provides="zope.schema.interfaces.IVocabularyFactory"
-           component=".info.httpMonitorRedirectVocabulary"
-           name="httpMonitorRedirectVocabulary"/>
+
 </configure>
