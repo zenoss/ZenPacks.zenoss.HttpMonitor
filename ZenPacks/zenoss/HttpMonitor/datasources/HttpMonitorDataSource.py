@@ -63,8 +63,7 @@ class HttpMonitorDataSource(PythonDataSource):
     url = '/'
     basicAuthUser = ''
     basicAuthPass = ''
-    onRedirect = 'follow'
-    onRedirectOptions = ('ok', 'warning', 'critical', 'follow', 'sticky', 'stickyport')
+    onRedirect = True
     proxyAuthUser = ''
     proxyAuthPassword = ''
     _properties = PythonDataSource._properties + (
@@ -75,7 +74,7 @@ class HttpMonitorDataSource(PythonDataSource):
         {'id': 'url', 'type': 'string', 'mode': 'w'},
         {'id': 'basicAuthUser', 'type': 'string', 'mode': 'w'},
         {'id': 'basicAuthPass', 'type': 'string', 'mode': 'w'},
-        {'id': 'onRedirect', 'type': 'string', 'mode': 'w'},
+        {'id': 'onRedirect', 'type': 'boolean', 'mode': 'w'},
         {'id': 'timeout', 'type': 'int', 'mode': 'w'},
         {'id': 'proxyAuthUser', 'type': 'string', 'mode': 'w'},
         {'id': 'proxyAuthPassword', 'type': 'string', 'mode': 'w'},
@@ -138,8 +137,10 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
         useSsl = ast.literal_eval(ds0.params['useSsl'])
         url = ds0.params['url']
         ipaddress = ds0.params['ipAddress']
+        onRedirect = ast.literal_eval(ds0.params['onRedirect'])
         chttp = CheckHttp()
         chttp.seturl(chttp.makeURL(hostname,port,url,useSsl))
+        chttp.redirect(onRedirect)
         chttp.setip(ipaddress,timeout)
         if useSsl:
             dhttp = chttp.connectssl()

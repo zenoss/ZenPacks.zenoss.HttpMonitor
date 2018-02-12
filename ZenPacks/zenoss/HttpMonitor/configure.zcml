@@ -9,9 +9,4 @@
   <utility provides="zope.schema.interfaces.IVocabularyFactory"
            component=".info.httpMonitorRedirectVocabulary"
            name="httpMonitorRedirectVocabulary"/>
-
-  <subscriber zcml:condition="installed ZenPacks.zenoss.DistributedCollector.interfaces"
-              for="ZenPacks.zenoss.DistributedCollector.DistributedPerformanceConf.DistributedPerformanceConf
-                   ZenPacks.zenoss.DistributedCollector.interfaces.ICollectorInstalled"
-              />
 </configure>

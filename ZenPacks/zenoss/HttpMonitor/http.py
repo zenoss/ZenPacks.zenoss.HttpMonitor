@@ -24,6 +24,7 @@ class CheckHttp(HTTPClientFactory):
         self._startTime = time.time()
         self._factory = None
         self._port = 80
+        self._follow = True
 
     def makeURL(self, hostname, port=80, uri="/", useSsl=False):
         if useSsl:
@@ -37,7 +38,7 @@ class CheckHttp(HTTPClientFactory):
 
     def seturl(self, url):
         self._url = url
-        HTTPClientFactory.__init__(self, url=self._url)
+        HTTPClientFactory.__init__(self, url=self._url, followRedirect=self._follow)
         self.setURL(self._url)
         self._factory = self
         return self
@@ -96,3 +97,13 @@ class CheckHttp(HTTPClientFactory):
         self.ipAddress = ip
         self.timeout = timeout
 
+    def redirect(self, follow=True):
+        """
+        Follow redirects
+        :param follow: bool
+        :return:
+        """
+        if follow:
+            self._follow = True
+        else:
+            self._follow = False

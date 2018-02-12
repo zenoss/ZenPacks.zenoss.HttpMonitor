@@ -49,8 +49,8 @@ False
 <property type="string" id="url" mode="w" >
 /
 </property>
-<property type="string" id="onRedirect" mode="w" >
-follow
+<property type="boolean" id="onRedirect" mode="w" >
+True
 </property>
 <property type="int" id="timeout" mode="w" >
 60

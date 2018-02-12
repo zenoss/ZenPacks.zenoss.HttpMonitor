@@ -15,9 +15,6 @@ from Products.Zuul.infos.template import RRDDataSourceInfo
 from ZenPacks.zenoss.HttpMonitor.interfaces import IHttpMonitorDataSourceInfo
 from ZenPacks.zenoss.HttpMonitor.datasources.HttpMonitorDataSource import HttpMonitorDataSource
 
-def httpMonitorRedirectVocabulary(context):
-    return SimpleVocabulary.fromValues(HttpMonitorDataSource.onRedirectOptions)
-
 
 class HttpMonitorDataSourceInfo(RRDDataSourceInfo):
     implements(IHttpMonitorDataSourceInfo)
@@ -34,7 +31,7 @@ class HttpMonitorDataSourceInfo(RRDDataSourceInfo):
 
     proxyAuthUser = ProxyProperty('proxyAuthUser')
     proxyAuthPassword = ProxyProperty('proxyAuthPassword')
-    
+
     @property
     def testable(self):
         """
