@@ -138,10 +138,18 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
         url = ds0.params['url']
         ipaddress = ds0.params['ipAddress']
         onRedirect = ast.literal_eval(ds0.params['onRedirect'])
+        basicAuthUser = ds0.params['basicAuthUser']
+        basicAuthPass = ds0.params['basicAuthPass']
+        proxyAuthUser = ds0.params['proxyAuthUser']
+        proxyAuthPassword = ds0.params['proxyAuthPassword']
         chttp = CheckHttp()
         chttp.seturl(chttp.makeURL(hostname,port,url,useSsl))
         chttp.redirect(onRedirect)
         chttp.setip(ipaddress,timeout)
+        if proxyAuthUser:
+            chttp.useProxy(proxyAuthUser, proxyAuthPassword)
+        if basicAuthUser:
+            chttp.useAuth(basicAuthUser, basicAuthPass)
         if useSsl:
             dhttp = chttp.connectssl()
         else:
