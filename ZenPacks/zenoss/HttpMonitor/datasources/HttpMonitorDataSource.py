@@ -13,15 +13,6 @@ __doc__ = '''HttpMonitorDataSource.py
 Defines datasource for HttpMonitor
 '''
 
-import time
-from twisted.internet import defer
-from zope.interface import implementer
-
-import httplib
-
-from zope.component import adapts
-from zope.interface import implements
-
 from Products.ZenEvents import ZenEventClasses
 from ZenPacks.zenoss.HttpMonitor.http import CheckHttp
 
@@ -143,9 +134,9 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
         proxyAuthUser = ds0.params['proxyAuthUser']
         proxyAuthPassword = ds0.params['proxyAuthPassword']
         chttp = CheckHttp()
-        chttp.seturl(chttp.makeURL(hostname,port,url,useSsl))
+        chttp.seturl(chttp.makeURL(hostname, port, url, useSsl))
         chttp.redirect(onRedirect)
-        chttp.setip(ipaddress,timeout)
+        chttp.setip(ipaddress, timeout)
         if proxyAuthUser:
             chttp.useProxy(proxyAuthUser, proxyAuthPassword)
         if basicAuthUser:
@@ -205,4 +196,3 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
         })
 
         return data
-
