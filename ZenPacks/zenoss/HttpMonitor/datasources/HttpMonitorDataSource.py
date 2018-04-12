@@ -31,12 +31,6 @@ import logging
 log = logging.getLogger('zen.HttpMonitor')
 
 
-class HttpException(Exception):
-    """
-    Http Exception.
-    """
-
-
 class HttpMonitorDataSource(PythonDataSource):
     HTTP_MONITOR = 'HttpMonitor'
     ZENPACKID = 'ZenPacks.zenoss.HttpMonitor'

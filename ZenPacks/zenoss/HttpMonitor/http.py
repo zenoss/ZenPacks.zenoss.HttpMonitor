@@ -9,8 +9,8 @@
 
 import base64
 import sys
-
 import time
+import urlparse
 
 from twisted.internet import reactor, ssl
 from twisted.web.client import HTTPClientFactory
@@ -27,13 +27,17 @@ class CheckHttp(HTTPClientFactory):
         self._follow = True
 
     def makeURL(self, hostname, port=80, uri="/", useSsl=False):
+        if bool(urlparse.urlparse(uri).netloc):
+            urlhost, urlpath = urlparse.urlparse(uri).netloc, urlparse.urlparse(uri).path
+        else:
+            urlhost, urlpath = hostname, uri
         if useSsl:
             scheme = "https"
             port = 443
         else:
             scheme = "http"
         self._port = port
-        url = scheme + '://' + hostname + ':' + str(port) + uri
+        url = scheme + '://' + urlhost + ':' + str(port) + urlpath
         return url
 
     def seturl(self, url):
@@ -59,11 +63,13 @@ class CheckHttp(HTTPClientFactory):
             res['size'] = self._bodysize(page)
             self.deferred.callback(res)
 
+    def noPage(self, reason):
+        if self.waiting:
+            self.waiting = 0
+            self.deferred.errback(reason)
+
     def _bodysize(self, body=""):
         return sys.getsizeof(body)
-
-    def noPage(self, reason):
-        pass
 
     def useProxy(self, username, password):
         proxyAuth = base64.encodestring('%s:%s' % (username, password))
