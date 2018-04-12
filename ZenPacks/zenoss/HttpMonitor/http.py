@@ -27,17 +27,18 @@ class CheckHttp(HTTPClientFactory):
         self._follow = True
 
     def makeURL(self, hostname, port=80, uri="/", useSsl=False):
-        if bool(urlparse.urlparse(uri).netloc):
-            urlhost, urlpath = urlparse.urlparse(uri).netloc, urlparse.urlparse(uri).path
-        else:
-            urlhost, urlpath = hostname, uri
         if useSsl:
             scheme = "https"
             port = 443
         else:
             scheme = "http"
+        parsed = urlparse.urlparse(uri)
+        if parsed.netloc: # Does it absolute URL or not
+            urlhost, urlpath, scheme = parsed.netloc, parsed.path, parsed.scheme
+        else:
+            urlhost, urlpath = hostname, uri
         self._port = port
-        url = scheme + '://' + urlhost + ':' + str(port) + urlpath
+        url = '{0}://{1}:{2}{3}'.format(scheme, urlhost, port, urlpath)
         return url
 
     def seturl(self, url):
