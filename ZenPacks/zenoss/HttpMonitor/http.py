@@ -33,7 +33,7 @@ class CheckHttp(HTTPClientFactory):
         else:
             scheme = "http"
         parsed = urlparse.urlparse(uri)
-        if parsed.netloc: # Does it absolute URL or not
+        if parsed.netloc:
             urlhost, urlpath, scheme = parsed.netloc, parsed.path, parsed.scheme
         else:
             urlhost, urlpath = hostname, uri
