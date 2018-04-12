@@ -32,13 +32,13 @@ class CheckHttp(HTTPClientFactory):
             port = 443
         else:
             scheme = "http"
-        parsed = urlparse.urlparse(uri)
-        if parsed.netloc:
-            urlhost, urlpath, scheme = parsed.netloc, parsed.path, parsed.scheme
+        url_data = urlparse.urlparse(uri)
+        if url_data.netloc:
+            url_host, url_path, scheme = url_data.netloc, url_data.path, url_data.scheme
         else:
-            urlhost, urlpath = hostname, uri
+            url_host, url_path = hostname, uri
         self._port = port
-        url = '{0}://{1}:{2}{3}'.format(scheme, urlhost, port, urlpath)
+        url = '{0}://{1}:{2}{3}'.format(scheme, url_host, port, url_path)
         return url
 
     def seturl(self, url):
