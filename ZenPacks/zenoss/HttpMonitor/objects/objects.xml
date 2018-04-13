@@ -82,7 +82,7 @@ True
 </object>
 </tomanycont>
 <tomanycont id='graphDefs'>
-<object id='Size' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<object id='HTTP size' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
 <property type="int" id="height" mode="w" >
 100
 </property>
@@ -136,7 +136,7 @@ AVERAGE
 </object>
 </tomanycont>
 </object>
-<object id='Time' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<object id='HTTP response time' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
 <property type="int" id="height" mode="w" >
 100
 </property>
