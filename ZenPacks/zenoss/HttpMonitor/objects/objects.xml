@@ -82,12 +82,15 @@ True
 </object>
 </tomanycont>
 <tomanycont id='graphDefs'>
-<object id='Size' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<object id='HTTP size' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
 <property type="int" id="height" mode="w" >
 100
 </property>
 <property type="int" id="width" mode="w" >
 500
+</property>
+<property type="string" id="units" mode="w" >
+bytes
 </property>
 <property type="boolean" id="log" mode="w" >
 False
@@ -136,12 +139,15 @@ AVERAGE
 </object>
 </tomanycont>
 </object>
-<object id='Time' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<object id='HTTP response time' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
 <property type="int" id="height" mode="w" >
 100
 </property>
 <property type="int" id="width" mode="w" >
 500
+</property>
+<property type="string" id="units" mode="w" >
+seconds
 </property>
 <property type="boolean" id="log" mode="w" >
 False
