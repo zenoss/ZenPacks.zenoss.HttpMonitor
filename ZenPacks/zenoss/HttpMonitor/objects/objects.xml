@@ -89,6 +89,9 @@ True
 <property type="int" id="width" mode="w" >
 500
 </property>
+<property type="string" id="units" mode="w" >
+bytes
+</property>
 <property type="boolean" id="log" mode="w" >
 False
 </property>
@@ -142,6 +145,9 @@ AVERAGE
 </property>
 <property type="int" id="width" mode="w" >
 500
+</property>
+<property type="string" id="units" mode="w" >
+seconds
 </property>
 <property type="boolean" id="log" mode="w" >
 False
