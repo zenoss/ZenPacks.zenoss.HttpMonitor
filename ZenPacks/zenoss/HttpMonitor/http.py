@@ -29,7 +29,6 @@ class CheckHttp(HTTPClientFactory):
     def makeURL(self, hostname, port=80, uri="/", useSsl=False):
         if useSsl:
             scheme = "https"
-            port = 443
         else:
             scheme = "http"
         url_data = urlparse.urlparse(uri)
@@ -38,7 +37,7 @@ class CheckHttp(HTTPClientFactory):
         else:
             url_host, url_path = hostname, uri
         self._port = port
-        url = '{0}://{1}:{2}{3}'.format(scheme, url_host, port, url_path)
+        url = '{0}://{1}{2}'.format(scheme, url_host, url_path)
         return url
 
     def seturl(self, url):
