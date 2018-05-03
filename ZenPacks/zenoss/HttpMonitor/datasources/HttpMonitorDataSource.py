@@ -128,18 +128,13 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
         proxyAuthUser = ds0.params['proxyAuthUser']
         proxyAuthPassword = ds0.params['proxyAuthPassword']
         chttp = CheckHttp()
-        chttp.seturl(chttp.makeURL(hostname, port, url, useSsl))
-        chttp.redirect(onRedirect)
-        chttp.setip(ipaddress, timeout)
+        chttp.setProp(ipAddr=ipaddress, hostname=hostname, url=url, port=port, timeout=timeout, ssl=useSsl)
+        chttp.makeURL()
         if proxyAuthUser:
             chttp.useProxy(proxyAuthUser, proxyAuthPassword)
         if basicAuthUser:
             chttp.useAuth(basicAuthUser, basicAuthPass)
-        if useSsl:
-            dhttp = chttp.connectssl()
-        else:
-            dhttp = chttp.connect()
-        return dhttp
+        return chttp.request(follow=onRedirect)
 
     def onSuccess(self, results, config):
         data = self.new_data()
@@ -190,3 +185,4 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
         })
 
         return data
+

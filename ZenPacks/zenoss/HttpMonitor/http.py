@@ -10,107 +10,91 @@
 import base64
 import sys
 import time
-import urlparse
 
-from twisted.internet import reactor, ssl
-from twisted.web.client import HTTPClientFactory
+from twisted.internet import reactor
+from twisted.internet.endpoints import TCP4ClientEndpoint
+from twisted.web.client import URI, RedirectAgent, Agent, ProxyAgent, readBody
+from twisted.web.http_headers import Headers
 
 
-class CheckHttp(HTTPClientFactory):
-    def __init__(self):
-        self._url = None
-        self.ipAddress = None
-        self.deferred = None
-        self._startTime = time.time()
-        self._factory = None
-        self._port = 80
-        self._follow = True
-
-    def makeURL(self, hostname, port=80, uri="/", useSsl=False):
-        if useSsl:
-            scheme = "https"
-            port = 443
-        else:
-            scheme = "http"
-        url_data = urlparse.urlparse(uri)
-        if url_data.netloc:
-            url_host, url_path, scheme = url_data.netloc, url_data.path, url_data.scheme
-        else:
-            url_host, url_path = hostname, uri
+class CheckHttp:
+    def setProp(self, ipAddr, hostname, url="/", port=80, timeout=5, ssl=False):
+        self._ipAddr = ipAddr
         self._port = port
-        url = '{0}://{1}:{2}{3}'.format(scheme, url_host, port, url_path)
-        return url
-
-    def seturl(self, url):
+        self._hostname = hostname
         self._url = url
-        HTTPClientFactory.__init__(self, url=self._url, followRedirect=self._follow)
-        self.setURL(self._url)
-        self._factory = self
-        return self
+        self._timeout = timeout
+        self._ssl = ssl
+        self._reactor = reactor
+        self._clientEdnpoint = None
+        self._proxyIp = None
+        self._reqURL = ""
+        self._startTime = None
+        self._follow = True
+        self._response = dict()
+        self._headers = Headers({b"User-Agent": [b"Zenoss HttpMonitor"]})
 
-    def setURL(self, url):
-        HTTPClientFactory.setURL(self, url)
-        self.path = url
-
-    def page(self, page):
-        if self.waiting:
-            self.waiting = 0
-            res = dict()
-            res['body'] = page
-            res['headers'] = self.response_headers
-            res['code'] = self.status
-            res['message'] = self.message
-            res['time'] = time.time() - self._startTime
-            res['size'] = self._bodysize(page)
-            self.deferred.callback(res)
-
-    def noPage(self, reason):
-        if self.waiting:
-            self.waiting = 0
-            self.deferred.errback(reason)
-
-    def _bodysize(self, body=""):
-        return sys.getsizeof(body)
+    def makeURL(self):
+        url_data = URI.fromBytes(self._url)
+        if not url_data.scheme:
+            scheme = "https" if self._ssl else "http"
+            self._reqURL = '{0}://{1}:{2}{3}'.format(scheme, self._hostname, self._port, self._url)
+            return
+        else:
+            if url_data.host == self._hostname:
+                scheme = "https" if self._ssl else "http"
+                self._reqURL = '{0}://{1}:{2}{3}'.format(scheme, self._hostname, self._port, url_data.path)
+                return
+            else:
+                self._proxyIp = self._ipAddr
+                self._reqURL = '{0}://{1}:{2}{3}'.format(url_data.scheme, url_data.host, url_data.port, url_data.path)
+                return
 
     def useProxy(self, username, password):
         proxyAuth = base64.encodestring('%s:%s' % (username, password))
         proxy_authHeader = "Basic " + proxyAuth.strip()
-        self.headers.update({'Proxy-Authorization': proxy_authHeader})
+        self._headers.setRawHeaders('Proxy-Authorization', [proxy_authHeader])
 
     def useAuth(self, username, password):
         basicAuth = base64.encodestring("%s:%s" % (username, password))
         authHeader = "Basic " + basicAuth.strip()
-        AuthHeaders = {"Authorization": authHeader}
-        self.headers.update(AuthHeaders)
+        self._headers.setRawHeaders("Authorization", [authHeader])
 
-    def processResult(self, response):
-        return response
-
-    @staticmethod
-    def dealWithError(err):
-        return err
-
-    def connect(self):
-        reactor.connectTCP(self.ipAddress, self._port, self._factory, self.timeout)
-        self.deferred.addCallbacks(self.processResult, self.dealWithError)
-        return self.deferred
-
-    def connectssl(self):
-        reactor.connectSSL(self.ipAddress, self._port, self._factory, ssl.ClientContextFactory(), self.timeout)
-        self.deferred.addCallbacks(self.processResult, self.dealWithError)
-        return self.deferred
-
-    def setip(self, ip, timeout=30):
-        self.ipAddress = ip
-        self.timeout = timeout
-
-    def redirect(self, follow=True):
-        """
-        Follow redirects
-        :param follow: bool
-        :return:
-        """
-        if follow:
-            self._follow = True
+    def _agent(self):
+        if not self._proxyIp:
+            agent = Agent(self._reactor, connectTimeout=self._timeout)
+            agent = RedirectAgent(agent) if self._follow else agent
+            return agent.request("GET", self._reqURL, self._headers)
+        elif self._proxyIp:
+            endpoint = TCP4ClientEndpoint(self._reactor, self._ipAddr, self._port, self._port)
+            agent = ProxyAgent(endpoint)
+            agent = RedirectAgent(agent) if self._follow else agent
+            return agent.request("GET", self._reqURL, self._headers)
         else:
-            self._follow = False
+            raise Exception("Can't choose a connection type")
+
+    def _bodysize(self, body=""):
+        return sys.getsizeof(body)
+
+    def _noPage(self, ex):
+        return ex
+
+    def request(self, follow=True):
+        self._follow = follow
+        self._startTime = time.time()
+        return self._agent().addCallbacks(self._getBody, self._noPage).addCallbacks(self._asnwer, self._noPage)
+
+    def _getBody(self, response):
+        self._response = response
+        return readBody(response)
+
+    def _asnwer(self, body):
+        res = dict()
+        res['body'] = body
+        res['headers'] = self._response.headers
+        res['code'] = self._response.code
+        res['message'] = self._response.phrase
+        res['time'] = time.time() - self._startTime
+        res['size'] = self._bodysize(body)
+        return res
+
