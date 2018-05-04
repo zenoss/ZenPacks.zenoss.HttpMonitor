@@ -13,7 +13,7 @@ import time
 
 from twisted.internet import reactor
 from twisted.internet.endpoints import TCP4ClientEndpoint
-from twisted.web.client import URI, RedirectAgent, Agent, ProxyAgent, readBody
+from twisted.web.client import URI, RedirectAgent, Agent, ProxyAgent, readBody, PartialDownloadError
 from twisted.web.http_headers import Headers
 
 
@@ -33,21 +33,26 @@ class CheckHttp:
         self._follow = True
         self._response = dict()
         self._headers = Headers({b"User-Agent": [b"Zenoss HttpMonitor"]})
+        self._body = ""
 
     def makeURL(self):
         url_data = URI.fromBytes(self._url)
         if not url_data.scheme:
             scheme = "https" if self._ssl else "http"
-            self._reqURL = '{0}://{1}:{2}{3}'.format(scheme, self._hostname, self._port, self._url)
+            self._reqURL = '{scheme}://{hostname}:{port}{url}'.format(scheme=scheme, hostname=self._hostname,
+                                                                      port=self._port, url=self._url)
             return
         else:
             if url_data.host == self._hostname:
                 scheme = "https" if self._ssl else "http"
-                self._reqURL = '{0}://{1}:{2}{3}'.format(scheme, self._hostname, self._port, url_data.path)
+                self._reqURL = '{scheme}://{hostname}:{port}{url}'.format(scheme=scheme, hostname=self._hostname,
+                                                                          port=self._port, url=url_data.path)
                 return
             else:
                 self._proxyIp = self._ipAddr
-                self._reqURL = '{0}://{1}:{2}{3}'.format(url_data.scheme, url_data.host, url_data.port, url_data.path)
+                self._reqURL = '{scheme}://{hostname}:{port}{url}'.format(scheme=url_data.scheme,
+                                                                          hostname=url_data.host, port=url_data.port,
+                                                                          url=url_data.path)
                 return
 
     def useProxy(self, username, password):
@@ -66,7 +71,8 @@ class CheckHttp:
             agent = RedirectAgent(agent) if self._follow else agent
             return agent.request("GET", self._reqURL, self._headers)
         elif self._proxyIp:
-            endpoint = TCP4ClientEndpoint(self._reactor, self._ipAddr, self._port, self._port)
+            endpoint = TCP4ClientEndpoint(reactor=self._reactor, host=self._ipAddr, port=self._port,
+                                          timeout=self._timeout)
             agent = ProxyAgent(endpoint)
             agent = RedirectAgent(agent) if self._follow else agent
             return agent.request("GET", self._reqURL, self._headers)
@@ -76,20 +82,24 @@ class CheckHttp:
     def _bodysize(self, body=""):
         return sys.getsizeof(body)
 
-    def _noPage(self, ex):
+    def _pageErr(self, ex):
+        if ex.type == PartialDownloadError:
+            self._body = ex.value.response
+            return
         return ex
 
     def request(self, follow=True):
         self._follow = follow
         self._startTime = time.time()
-        return self._agent().addCallbacks(self._getBody, self._noPage).addCallbacks(self._asnwer, self._noPage)
+        return self._agent().addCallbacks(self._getBody, self._pageErr).addCallbacks(self._asnwer, self._pageErr)
 
     def _getBody(self, response):
         self._response = response
-        return readBody(response)
+        return readBody(response).addErrback(self._pageErr)
 
     def _asnwer(self, body):
         res = dict()
+        body = body if not self._body else self._body
         res['body'] = body
         res['headers'] = self._response.headers
         res['code'] = self._response.code
