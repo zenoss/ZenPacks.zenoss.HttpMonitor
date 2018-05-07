@@ -10,107 +10,115 @@
 import base64
 import sys
 import time
-import urlparse
+from operator import xor
 
-from twisted.internet import reactor, ssl
-from twisted.web.client import HTTPClientFactory
+from twisted.internet import reactor
+from twisted.internet.endpoints import TCP4ClientEndpoint
+from twisted.names import client, dns
+from twisted.web.client import URI, RedirectAgent, Agent, ProxyAgent, readBody, PartialDownloadError
+from twisted.web.http_headers import Headers
 
 
-class CheckHttp(HTTPClientFactory):
-    def __init__(self):
-        self._url = None
-        self.ipAddress = None
-        self.deferred = None
-        self._startTime = time.time()
-        self._factory = None
-        self._port = 80
-        self._follow = True
-
-    def makeURL(self, hostname, port=80, uri="/", useSsl=False):
-        if useSsl:
-            scheme = "https"
-            port = 443
-        else:
-            scheme = "http"
-        url_data = urlparse.urlparse(uri)
-        if url_data.netloc:
-            url_host, url_path, scheme = url_data.netloc, url_data.path, url_data.scheme
-        else:
-            url_host, url_path = hostname, uri
+class CheckHttp:
+    def __init__(self, ipAddr, hostname, url="/", port=80, timeout=5, ssl=False, follow=True):
+        self._ipAddr = ipAddr
         self._port = port
-        url = '{0}://{1}:{2}{3}'.format(scheme, url_host, port, url_path)
-        return url
-
-    def seturl(self, url):
+        self._hostname = hostname
         self._url = url
-        HTTPClientFactory.__init__(self, url=self._url, followRedirect=self._follow)
-        self.setURL(self._url)
-        self._factory = self
-        return self
+        self._timeout = timeout
+        self._ssl = ssl
+        self._reactor = reactor
+        self._clientEdnpoint = None
+        self._proxyIp = None
+        self._reqURL = ""
+        self._startTime = None
+        self._follow = follow
+        self._response = dict()
+        self._headers = Headers({b"User-Agent": [b"Zenoss HttpMonitor"]})
+        self._body = ""
+        self._hostnameIp = list()
 
-    def setURL(self, url):
-        HTTPClientFactory.setURL(self, url)
-        self.path = url
+    def _getIp(self, response):
+        if response:
+            for a in response[0]:
+                if a.payload.TYPE == dns.A:
+                    self._hostnameIp.append(a.payload.dottedQuad())
+        return self.request()
 
-    def page(self, page):
-        if self.waiting:
-            self.waiting = 0
-            res = dict()
-            res['body'] = page
-            res['headers'] = self.response_headers
-            res['code'] = self.status
-            res['message'] = self.message
-            res['time'] = time.time() - self._startTime
-            res['size'] = self._bodysize(page)
-            self.deferred.callback(res)
-
-    def noPage(self, reason):
-        if self.waiting:
-            self.waiting = 0
-            self.deferred.errback(reason)
-
-    def _bodysize(self, body=""):
-        return sys.getsizeof(body)
+    def makeURL(self):
+        url_data = URI.fromBytes(self._url)
+        if url_data.scheme:
+            args = {
+                "scheme": url_data.scheme,
+                "host": url_data.host,
+                "port": url_data.port,
+                "path": url_data.path,
+            }
+        else:
+            args = {
+                "scheme": "https" if self._ssl else "http",
+                "hostname": self._hostname,
+                "port": self._port,
+                "path": self._url,
+            }
+        self._reqURL = "{scheme}://{hostname}:{port}{path}".format(**args)
+        hasScheme = bool(url_data.scheme)
+        hostMatch = url_data.host == self._hostname
+        ipMatch = self._ipAddr in self._hostnameIp
+        if (hasScheme and not hostMatch) or \
+                (not hasScheme and xor(hostMatch, ipMatch)):
+            self._proxyIp = self._ipAddr
 
     def useProxy(self, username, password):
         proxyAuth = base64.encodestring('%s:%s' % (username, password))
         proxy_authHeader = "Basic " + proxyAuth.strip()
-        self.headers.update({'Proxy-Authorization': proxy_authHeader})
+        self._headers.setRawHeaders('Proxy-Authorization', [proxy_authHeader])
 
     def useAuth(self, username, password):
         basicAuth = base64.encodestring("%s:%s" % (username, password))
         authHeader = "Basic " + basicAuth.strip()
-        AuthHeaders = {"Authorization": authHeader}
-        self.headers.update(AuthHeaders)
+        self._headers.setRawHeaders("Authorization", [authHeader])
 
-    def processResult(self, response):
-        return response
+    def _agent(self):
+        if not self._proxyIp:
+            agent = Agent(self._reactor, connectTimeout=self._timeout)
+            agent = RedirectAgent(agent) if self._follow else agent
+            return agent.request("GET", self._reqURL, self._headers)
+        elif self._proxyIp:
+            endpoint = TCP4ClientEndpoint(reactor=self._reactor, host=self._ipAddr, port=self._port,
+                                          timeout=self._timeout)
+            agent = ProxyAgent(endpoint)
+            agent = RedirectAgent(agent) if self._follow else agent
+            return agent.request("GET", self._reqURL, self._headers)
 
-    @staticmethod
-    def dealWithError(err):
-        return err
+    def _bodysize(self, body=""):
+        return sys.getsizeof(body)
+
+    def _pageErr(self, ex):
+        if ex.type == PartialDownloadError:
+            self._body = ex.value.response
+            return
+        return ex
 
     def connect(self):
-        reactor.connectTCP(self.ipAddress, self._port, self._factory, self.timeout)
-        self.deferred.addCallbacks(self.processResult, self.dealWithError)
-        return self.deferred
+        return client.lookupAddress(self._hostname).addCallbacks(self._getIp, self.request)
 
-    def connectssl(self):
-        reactor.connectSSL(self.ipAddress, self._port, self._factory, ssl.ClientContextFactory(), self.timeout)
-        self.deferred.addCallbacks(self.processResult, self.dealWithError)
-        return self.deferred
+    def request(self):
+        self.makeURL()
+        self._startTime = time.time()
+        return self._agent().addCallbacks(self._getBody, self._pageErr).addCallbacks(self._answer, self._pageErr)
 
-    def setip(self, ip, timeout=30):
-        self.ipAddress = ip
-        self.timeout = timeout
+    def _getBody(self, response):
+        self._response = response
+        return readBody(response).addErrback(self._pageErr)
 
-    def redirect(self, follow=True):
-        """
-        Follow redirects
-        :param follow: bool
-        :return:
-        """
-        if follow:
-            self._follow = True
-        else:
-            self._follow = False
+    def _answer(self, body):
+        res = dict()
+        body = body if not self._body else self._body
+        res['body'] = body
+        res['headers'] = self._response.headers
+        res['code'] = self._response.code
+        res['message'] = self._response.phrase
+        res['time'] = time.time() - self._startTime
+        res['size'] = self._bodysize(body)
+        return res
