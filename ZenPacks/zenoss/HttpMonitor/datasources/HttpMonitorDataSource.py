@@ -13,20 +13,14 @@ __doc__ = '''HttpMonitorDataSource.py
 Defines datasource for HttpMonitor
 '''
 
+import ast
+import logging
+
 from Products.ZenEvents import ZenEventClasses
-from ZenPacks.zenoss.HttpMonitor.http import CheckHttp
-
-from Products.Zuul.form import schema
-from Products.Zuul.infos import ProxyProperty
-from Products.Zuul.infos.template import RRDDataSourceInfo
-from Products.Zuul.interfaces import IRRDDataSourceInfo
-from Products.Zuul.utils import ZuulMessageFactory as _t
-
 from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource \
     import PythonDataSource, PythonDataSourcePlugin
 
-import ast
-import logging
+from ZenPacks.zenoss.HttpMonitor.http import CheckHttp
 
 log = logging.getLogger('zen.HttpMonitor')
 
@@ -128,13 +122,13 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
         proxyAuthUser = ds0.params['proxyAuthUser']
         proxyAuthPassword = ds0.params['proxyAuthPassword']
         chttp = CheckHttp()
-        chttp.setProp(ipAddr=ipaddress, hostname=hostname, url=url, port=port, timeout=timeout, ssl=useSsl)
-        chttp.makeURL()
+        chttp.setProp(ipAddr=ipaddress, hostname=hostname, url=url, port=port, timeout=timeout, ssl=useSsl,
+                      follow=onRedirect)
         if proxyAuthUser:
             chttp.useProxy(proxyAuthUser, proxyAuthPassword)
         if basicAuthUser:
             chttp.useAuth(basicAuthUser, basicAuthPass)
-        return chttp.request(follow=onRedirect)
+        return chttp.connect()
 
     def onSuccess(self, results, config):
         data = self.new_data()
@@ -185,4 +179,3 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
         })
 
         return data
-

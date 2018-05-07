@@ -13,12 +13,20 @@ import time
 
 from twisted.internet import reactor
 from twisted.internet.endpoints import TCP4ClientEndpoint
+from twisted.names import client, dns
 from twisted.web.client import URI, RedirectAgent, Agent, ProxyAgent, readBody, PartialDownloadError
 from twisted.web.http_headers import Headers
 
 
 class CheckHttp:
-    def setProp(self, ipAddr, hostname, url="/", port=80, timeout=5, ssl=False):
+    def _getIp(self, response):
+        if response:
+            for a in response[0]:
+                if a.payload.TYPE == dns.A:
+                    self._hostnameIp.append(a.payload.dottedQuad())
+        return self.request()
+
+    def setProp(self, ipAddr, hostname, url="/", port=80, timeout=5, ssl=False, follow=True):
         self._ipAddr = ipAddr
         self._port = port
         self._hostname = hostname
@@ -30,10 +38,11 @@ class CheckHttp:
         self._proxyIp = None
         self._reqURL = ""
         self._startTime = None
-        self._follow = True
+        self._follow = follow
         self._response = dict()
         self._headers = Headers({b"User-Agent": [b"Zenoss HttpMonitor"]})
         self._body = ""
+        self._hostnameIp = list()
 
     def makeURL(self):
         url_data = URI.fromBytes(self._url)
@@ -43,7 +52,7 @@ class CheckHttp:
                                                                       port=self._port, url=self._url)
             return
         else:
-            if url_data.host == self._hostname:
+            if url_data.host == self._hostname and self._ipAddr in self._hostnameIp:
                 scheme = "https" if self._ssl else "http"
                 self._reqURL = '{scheme}://{hostname}:{port}{url}'.format(scheme=scheme, hostname=self._hostname,
                                                                           port=self._port, url=url_data.path)
@@ -88,8 +97,11 @@ class CheckHttp:
             return
         return ex
 
-    def request(self, follow=True):
-        self._follow = follow
+    def connect(self):
+        return client.lookupAddress(self._hostname).addCallbacks(self._getIp, self.request)
+
+    def request(self):
+        self.makeURL()
         self._startTime = time.time()
         return self._agent().addCallbacks(self._getBody, self._pageErr).addCallbacks(self._asnwer, self._pageErr)
 
