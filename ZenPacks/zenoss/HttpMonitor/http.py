@@ -46,23 +46,28 @@ class CheckHttp:
 
     def makeURL(self):
         url_data = URI.fromBytes(self._url)
-        if not url_data.scheme:
-            scheme = "https" if self._ssl else "http"
-            self._reqURL = '{scheme}://{hostname}:{port}{url}'.format(scheme=scheme, hostname=self._hostname,
-                                                                      port=self._port, url=self._url)
-            return
+        if url_data.scheme:
+            args = {
+                "scheme": url_data.scheme,
+                "host": url_data.host,
+                "port": url_data.port,
+                "path": url_data.path,
+            }
         else:
-            if url_data.host == self._hostname and self._ipAddr in self._hostnameIp:
-                scheme = "https" if self._ssl else "http"
-                self._reqURL = '{scheme}://{hostname}:{port}{url}'.format(scheme=scheme, hostname=self._hostname,
-                                                                          port=self._port, url=url_data.path)
-                return
-            else:
-                self._proxyIp = self._ipAddr
-                self._reqURL = '{scheme}://{hostname}:{port}{url}'.format(scheme=url_data.scheme,
-                                                                          hostname=url_data.host, port=url_data.port,
-                                                                          url=url_data.path)
-                return
+            args = {
+                "scheme": "https" if self._ssl else "http",
+                "hostname": self._hostname,
+                "port": self._port,
+                "path": self._url,
+            }
+        self._reqURL = "{scheme}://{hostname}:{port}{path}".format(**args)
+        url_data = URI.fromBytes(self._url)
+        hasScheme = bool(url_data.scheme)
+        hostMatch = url_data.host == self._hostname
+        ipMatch = self._ipAddr in self._hostnameIp
+        if (hasScheme and not hostMatch) or \
+                (not hasScheme and xor(hostMatch, ipMatch)):
+            self._proxyIp = self._ipAddr
 
     def useProxy(self, username, password):
         proxyAuth = base64.encodestring('%s:%s' % (username, password))
@@ -103,13 +108,13 @@ class CheckHttp:
     def request(self):
         self.makeURL()
         self._startTime = time.time()
-        return self._agent().addCallbacks(self._getBody, self._pageErr).addCallbacks(self._asnwer, self._pageErr)
+        return self._agent().addCallbacks(self._getBody, self._pageErr).addCallbacks(self._answer, self._pageErr)
 
     def _getBody(self, response):
         self._response = response
         return readBody(response).addErrback(self._pageErr)
 
-    def _asnwer(self, body):
+    def _answer(self, body):
         res = dict()
         body = body if not self._body else self._body
         res['body'] = body
