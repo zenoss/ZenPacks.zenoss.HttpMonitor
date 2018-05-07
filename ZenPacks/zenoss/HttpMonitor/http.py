@@ -10,6 +10,7 @@
 import base64
 import sys
 import time
+from operator import xor
 
 from twisted.internet import reactor
 from twisted.internet.endpoints import TCP4ClientEndpoint
@@ -61,7 +62,6 @@ class CheckHttp:
                 "path": self._url,
             }
         self._reqURL = "{scheme}://{hostname}:{port}{path}".format(**args)
-        url_data = URI.fromBytes(self._url)
         hasScheme = bool(url_data.scheme)
         hostMatch = url_data.host == self._hostname
         ipMatch = self._ipAddr in self._hostnameIp
@@ -90,8 +90,6 @@ class CheckHttp:
             agent = ProxyAgent(endpoint)
             agent = RedirectAgent(agent) if self._follow else agent
             return agent.request("GET", self._reqURL, self._headers)
-        else:
-            raise Exception("Can't choose a connection type")
 
     def _bodysize(self, body=""):
         return sys.getsizeof(body)
