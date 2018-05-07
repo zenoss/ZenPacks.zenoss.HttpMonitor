@@ -19,14 +19,7 @@ from twisted.web.http_headers import Headers
 
 
 class CheckHttp:
-    def _getIp(self, response):
-        if response:
-            for a in response[0]:
-                if a.payload.TYPE == dns.A:
-                    self._hostnameIp.append(a.payload.dottedQuad())
-        return self.request()
-
-    def setProp(self, ipAddr, hostname, url="/", port=80, timeout=5, ssl=False, follow=True):
+    def __init__(self, ipAddr, hostname, url="/", port=80, timeout=5, ssl=False, follow=True):
         self._ipAddr = ipAddr
         self._port = port
         self._hostname = hostname
@@ -43,6 +36,13 @@ class CheckHttp:
         self._headers = Headers({b"User-Agent": [b"Zenoss HttpMonitor"]})
         self._body = ""
         self._hostnameIp = list()
+
+    def _getIp(self, response):
+        if response:
+            for a in response[0]:
+                if a.payload.TYPE == dns.A:
+                    self._hostnameIp.append(a.payload.dottedQuad())
+        return self.request()
 
     def makeURL(self):
         url_data = URI.fromBytes(self._url)
@@ -124,4 +124,3 @@ class CheckHttp:
         res['time'] = time.time() - self._startTime
         res['size'] = self._bodysize(body)
         return res
-

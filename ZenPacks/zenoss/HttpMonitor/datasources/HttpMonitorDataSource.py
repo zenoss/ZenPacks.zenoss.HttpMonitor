@@ -121,9 +121,8 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
         proxyAuthUser = ds0.params['proxyAuthUser']
         proxyAuthPassword = ds0.params['proxyAuthPassword']
         log.info("HTTPMonitor collecting started for a host: {}".format(hostname))
-        chttp = CheckHttp()
-        chttp.setProp(ipAddr=ipaddress, hostname=hostname, url=url, port=port, timeout=timeout, ssl=useSsl,
-                      follow=onRedirect)
+        chttp = CheckHttp(ipAddr=ipaddress, hostname=hostname, url=url, port=port, timeout=timeout, ssl=useSsl,
+                          follow=onRedirect)
         if proxyAuthUser:
             chttp.useProxy(proxyAuthUser, proxyAuthPassword)
         if basicAuthUser:
