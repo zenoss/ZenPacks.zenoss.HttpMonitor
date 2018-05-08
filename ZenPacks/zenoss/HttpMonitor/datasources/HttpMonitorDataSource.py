@@ -20,7 +20,7 @@ from Products.ZenEvents import ZenEventClasses
 from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource \
     import PythonDataSource, PythonDataSourcePlugin
 
-from ZenPacks.zenoss.HttpMonitor.http import CheckHttp
+from ZenPacks.zenoss.HttpMonitor.http import HTTPMonitor
 
 log = logging.getLogger('zen.HttpMonitor')
 
@@ -121,8 +121,8 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
         proxyAuthUser = ds0.params['proxyAuthUser']
         proxyAuthPassword = ds0.params['proxyAuthPassword']
         log.info("HTTPMonitor collecting started for a host: {}".format(hostname))
-        chttp = CheckHttp(ipAddr=ipaddress, hostname=hostname, url=url, port=port, timeout=timeout, ssl=useSsl,
-                          follow=onRedirect)
+        chttp = HTTPMonitor(ipAddr=ipaddress, hostname=hostname, url=url, port=port, timeout=timeout, ssl=useSsl,
+                            follow=onRedirect)
         if proxyAuthUser:
             chttp.useProxy(proxyAuthUser, proxyAuthPassword)
         if basicAuthUser:
