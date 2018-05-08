@@ -8,6 +8,7 @@
 ##############################################################################
 
 import base64
+import logging
 import sys
 import time
 from operator import xor
@@ -18,8 +19,10 @@ from twisted.names import client, dns
 from twisted.web.client import URI, RedirectAgent, Agent, ProxyAgent, readBody, PartialDownloadError
 from twisted.web.http_headers import Headers
 
+log = logging.getLogger('zen.HttpMonitor')
 
-class CheckHttp:
+
+class HTTPMonitor:
     def __init__(self, ipAddr, hostname, url="/", port=80, timeout=5, ssl=False, follow=True):
         self._ipAddr = ipAddr
         self._port = port
@@ -28,7 +31,6 @@ class CheckHttp:
         self._timeout = timeout
         self._ssl = ssl
         self._reactor = reactor
-        self._clientEdnpoint = None
         self._proxyIp = None
         self._reqURL = ""
         self._startTime = None
@@ -50,7 +52,7 @@ class CheckHttp:
         if url_data.scheme:
             args = {
                 "scheme": url_data.scheme,
-                "host": url_data.host,
+                "hostname": url_data.host,
                 "port": url_data.port,
                 "path": url_data.path,
             }
@@ -62,12 +64,12 @@ class CheckHttp:
                 "path": self._url,
             }
         self._reqURL = "{scheme}://{hostname}:{port}{path}".format(**args)
-        hasScheme = bool(url_data.scheme)
+        hasHost = bool(url_data.host)
         hostMatch = url_data.host == self._hostname
         ipMatch = self._ipAddr in self._hostnameIp
-        if (hasScheme and not hostMatch) or \
-                (not hasScheme and xor(hostMatch, ipMatch)):
+        if hasHost and xor(hostMatch, ipMatch):
             self._proxyIp = self._ipAddr
+        log.debug("HTTP request URL: %s, Proxy: %s", self._reqURL, self._proxyIp)
 
     def useProxy(self, username, password):
         proxyAuth = base64.encodestring('%s:%s' % (username, password))
