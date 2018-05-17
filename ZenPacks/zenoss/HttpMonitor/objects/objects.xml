@@ -49,14 +49,8 @@ False
 <property type="string" id="url" mode="w" >
 /
 </property>
-<property type="boolean" id="caseSensitive" mode="w" >
-False
-</property>
-<property type="boolean" id="invert" mode="w" >
-False
-</property>
-<property type="string" id="onRedirect" mode="w" >
-follow
+<property type="boolean" id="onRedirect" mode="w" >
+True
 </property>
 <property type="int" id="timeout" mode="w" >
 60
@@ -88,12 +82,15 @@ True
 </object>
 </tomanycont>
 <tomanycont id='graphDefs'>
-<object id='Size' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<object id='HTTP size' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
 <property type="int" id="height" mode="w" >
 100
 </property>
 <property type="int" id="width" mode="w" >
 500
+</property>
+<property type="string" id="units" mode="w" >
+bytes
 </property>
 <property type="boolean" id="log" mode="w" >
 False
@@ -142,12 +139,15 @@ AVERAGE
 </object>
 </tomanycont>
 </object>
-<object id='Time' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
+<object id='HTTP response time' module='Products.ZenModel.GraphDefinition' class='GraphDefinition'>
 <property type="int" id="height" mode="w" >
 100
 </property>
 <property type="int" id="width" mode="w" >
 500
+</property>
+<property type="string" id="units" mode="w" >
+seconds
 </property>
 <property type="boolean" id="log" mode="w" >
 False

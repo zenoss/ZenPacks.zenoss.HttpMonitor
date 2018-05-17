@@ -19,12 +19,3 @@ from Products.CMFCore.DirectoryView import registerDirectory
 if os.path.isdir(skinsDir):
     registerDirectory(skinsDir, globals())
 
-def onCollectorInstalled(ob, event):
-    zpFriendly = 'HttpMonitor'
-    errormsg = '{0} binary cannot be found on {1}. This is part of the nagios-plugins ' + \
-               'dependency, and must be installed before {2} can function.'
-    
-    verifyBin = 'check_http'
-    code, output = ob.executeCommand('zenbincheck %s' % verifyBin, 'zenoss', needsZenHome=True)
-    if code:
-       	log.warn(errormsg.format(verifyBin, ob.hostname, zpFriendly))

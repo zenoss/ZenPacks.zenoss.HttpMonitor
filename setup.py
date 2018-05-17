@@ -1,6 +1,6 @@
 ##############################################################################
 # 
-# Copyright (C) Zenoss, Inc. 2008, all rights reserved.
+# Copyright (C) Zenoss, Inc. 2018, all rights reserved.
 # 
 # This content is made available according to terms specified in
 # License.zenoss under the directory where your Zenoss product is installed.
@@ -12,13 +12,13 @@
 # These variables are overwritten by Zenoss when the ZenPack is exported
 # or saved.  Do not modify them directly here.
 NAME = 'ZenPacks.zenoss.HttpMonitor'
-VERSION = '2.1.1'
+VERSION = '3.0.0'
 AUTHOR = 'Zenoss'
 LICENSE = ''
 NAMESPACE_PACKAGES = ['ZenPacks', 'ZenPacks.zenoss']
 PACKAGES = ['ZenPacks', 'ZenPacks.zenoss', 'ZenPacks.zenoss.HttpMonitor']
-INSTALL_REQUIRES = []
-COMPAT_ZENOSS_VERS = '>=2.5.70'
+INSTALL_REQUIRES = ['ZenPacks.zenoss.PythonCollector']
+COMPAT_ZENOSS_VERS = '>=4.2'
 PREV_ZENPACK_NAME = 'HttpMonitor'
 # STOP_REPLACEMENTS
 ################################
