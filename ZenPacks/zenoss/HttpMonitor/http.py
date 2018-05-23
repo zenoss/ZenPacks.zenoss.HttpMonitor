@@ -103,7 +103,7 @@ class HTTPMonitor:
         return ex
 
     def connect(self):
-        return client.lookupAddress(self._hostname).addCallbacks(self._getIp, self.request)
+        return client.lookupAddress(self._hostname).addCallbacks(self._getIp, self._pageErr)
 
     def request(self):
         self.makeURL()
