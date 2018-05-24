@@ -15,15 +15,20 @@ from operator import xor
 
 from twisted.internet import reactor
 from twisted.internet.endpoints import TCP4ClientEndpoint
-from twisted.names import client, dns
-from twisted.web.client import URI, RedirectAgent, Agent, ProxyAgent, readBody, PartialDownloadError
+from twisted.names import client, error, dns
+from twisted.python.failure import Failure
+from twisted.web.client import (
+    URI, RedirectAgent, Agent, ProxyAgent, readBody, PartialDownloadError
+)
 from twisted.web.http_headers import Headers
 
 log = logging.getLogger('zen.HttpMonitor')
 
 
 class HTTPMonitor:
-    def __init__(self, ipAddr, hostname, url="/", port=80, timeout=5, ssl=False, follow=True):
+    def __init__(
+            self, ipAddr, hostname,
+            url="/", port=80, timeout=5, ssl=False, follow=True):
         self._ipAddr = ipAddr
         self._port = port
         self._hostname = hostname
@@ -69,7 +74,9 @@ class HTTPMonitor:
         ipMatch = self._ipAddr in self._hostnameIp
         if hasHost and xor(hostMatch, ipMatch):
             self._proxyIp = self._ipAddr
-        log.debug("HTTP request URL: %s, Proxy: %s", self._reqURL, self._proxyIp)
+        log.debug(
+            "HTTP request URL: %s, Proxy: %s", self._reqURL, self._proxyIp
+        )
 
     def useProxy(self, username, password):
         proxyAuth = base64.encodestring('%s:%s' % (username, password))
@@ -87,8 +94,10 @@ class HTTPMonitor:
             agent = RedirectAgent(agent) if self._follow else agent
             return agent.request("GET", self._reqURL, self._headers)
         elif self._proxyIp:
-            endpoint = TCP4ClientEndpoint(reactor=self._reactor, host=self._ipAddr, port=self._port,
-                                          timeout=self._timeout)
+            endpoint = TCP4ClientEndpoint(
+                reactor=self._reactor, host=self._ipAddr, port=self._port,
+                timeout=self._timeout
+            )
             agent = ProxyAgent(endpoint)
             agent = RedirectAgent(agent) if self._follow else agent
             return agent.request("GET", self._reqURL, self._headers)
@@ -96,19 +105,36 @@ class HTTPMonitor:
     def _bodysize(self, body=""):
         return sys.getsizeof(body)
 
-    def _pageErr(self, ex):
-        if ex.type == PartialDownloadError:
-            self._body = ex.value.response
+    def _pageErr(self, failure):
+        if failure.type == PartialDownloadError:
+            self._body = failure.value.response
             return
-        return ex
+        return failure
+
+    def _lookupErr(self, failure):
+        ex = failure.check(error.DNSNameError)
+        if ex:
+            # The message of a DNS exception is not useful, so create an
+            # exception with a useful message and return that instead.
+            return Failure(
+                exc_value=RuntimeError("hostname not found"),
+                exc_type=RuntimeError,
+                exc_tb=failure.tb,
+                captureVars=failure.captureVars
+            )
+        return failure
 
     def connect(self):
-        return client.lookupAddress(self._hostname).addCallbacks(self._getIp, self._pageErr)
+        return client.lookupAddress(self._hostname).addCallbacks(
+            self._getIp, self._lookupErr
+        )
 
     def request(self):
         self.makeURL()
         self._startTime = time.time()
-        return self._agent().addCallbacks(self._getBody, self._pageErr).addCallbacks(self._answer, self._pageErr)
+        return self._agent().addCallbacks(
+            self._getBody, self._pageErr
+        ).addCallbacks(self._answer, self._pageErr)
 
     def _getBody(self, response):
         self._response = response
