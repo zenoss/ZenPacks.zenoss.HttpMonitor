@@ -13,6 +13,7 @@ import sys
 import time
 from operator import xor
 
+from Products.ZenUtils.IpUtil import isip
 from twisted.internet import reactor
 from twisted.internet.endpoints import TCP4ClientEndpoint
 from twisted.names import client, error, dns
@@ -23,7 +24,6 @@ from twisted.web.client import (
 from twisted.web.http_headers import Headers
 
 log = logging.getLogger('zen.HttpMonitor')
-
 
 class HTTPMonitor:
     def __init__(
@@ -68,12 +68,16 @@ class HTTPMonitor:
                 "port": self._port,
                 "path": self._url,
             }
-        self._reqURL = "{scheme}://{hostname}:{port}{path}".format(**args)
         hasHost = bool(url_data.host)
-        hostMatch = url_data.host == self._hostname
+        hostMatch = url_data.host.endswith(self._hostname)
         ipMatch = self._ipAddr in self._hostnameIp
-        if hasHost and xor(hostMatch, ipMatch):
+        if hasHost and xor(hostMatch, ipMatch) or not ipMatch:
             self._proxyIp = self._ipAddr
+        # Remove port if default (see RFC 2616, 14.23)
+        if int(args.get('port', None)) in (80, 443) or self._proxyIp:
+            self._reqURL = "{scheme}://{hostname}{path}".format(**args)
+        else:
+            self._reqURL = "{scheme}://{hostname}:{port}{path}".format(**args)
         log.debug(
             "HTTP request URL: %s, Proxy: %s", self._reqURL, self._proxyIp
         )
@@ -125,9 +129,12 @@ class HTTPMonitor:
         return failure
 
     def connect(self):
-        return client.lookupAddress(self._hostname).addCallbacks(
-            self._getIp, self._lookupErr
-        )
+        if not isip(self._hostname):
+            return client.lookupAddress(self._hostname).addCallbacks(
+                self._getIp, self._lookupErr
+            )
+        else:
+            return self.request()
 
     def request(self):
         self.makeURL()
