@@ -25,6 +25,7 @@ from twisted.web.http_headers import Headers
 
 log = logging.getLogger('zen.HttpMonitor')
 
+
 class HTTPMonitor:
     def __init__(
             self, ipAddr, hostname,
@@ -95,16 +96,14 @@ class HTTPMonitor:
     def _agent(self):
         if not self._proxyIp:
             agent = Agent(self._reactor, connectTimeout=self._timeout)
-            agent = RedirectAgent(agent) if self._follow else agent
-            return agent.request("GET", self._reqURL, self._headers)
-        elif self._proxyIp:
+        else:
             endpoint = TCP4ClientEndpoint(
                 reactor=self._reactor, host=self._ipAddr, port=self._port,
                 timeout=self._timeout
             )
             agent = ProxyAgent(endpoint)
-            agent = RedirectAgent(agent) if self._follow else agent
-            return agent.request("GET", self._reqURL, self._headers)
+        agent = RedirectAgent(agent) if self._follow else agent
+        return agent.request("GET", self._reqURL, self._headers)
 
     def _bodysize(self, body=""):
         return sys.getsizeof(body)
@@ -133,8 +132,7 @@ class HTTPMonitor:
             return client.lookupAddress(self._hostname).addCallbacks(
                 self._getIp, self._lookupErr
             )
-        else:
-            return self.request()
+        return self.request()
 
     def request(self):
         self.makeURL()
