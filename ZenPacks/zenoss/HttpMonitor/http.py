@@ -75,7 +75,7 @@ class HTTPMonitor:
         if hasHost and xor(hostMatch, ipMatch) or not ipMatch:
             self._proxyIp = self._ipAddr
         # Remove port if default (see RFC 2616, 14.23)
-        if int(args.get('port', None)) in (80, 443) or self._proxyIp:
+        if int(args['port']) in (80, 443) or self._proxyIp and not url_data.scheme:
             self._reqURL = "{scheme}://{hostname}{path}".format(**args)
         else:
             self._reqURL = "{scheme}://{hostname}:{port}{path}".format(**args)
