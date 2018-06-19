@@ -13,8 +13,7 @@ import sys
 import time
 from operator import xor
 
-from Products.ZenUtils.IpUtil import isip
-from Products.ZenUtils.IpUtil import getHostByName
+from Products.ZenUtils.IpUtil import isip, getHostByName
 from twisted.internet import reactor
 from twisted.internet.endpoints import TCP4ClientEndpoint
 from twisted.names import client, error, dns
@@ -52,17 +51,10 @@ class HTTPMonitor:
             for a in response[0]:
                 if a.payload.TYPE == dns.A:
                     self._hostnameIp.append(a.payload.dottedQuad())
+        self._lookupProxyIp()
         return self.request()
 
     def makeURL(self):
-        if not isip(self._ipAddr):
-            try:
-                self._ipAddr = getHostByName(self._ipAddr)
-            except Exception:
-                raise Failure(
-                    exc_value=RuntimeError("Unable to resolve hostname as IP address"),
-                    exc_type=RuntimeError
-                    )
         url_data = URI.fromBytes(self._url)
         if url_data.scheme:
             args = {
@@ -136,6 +128,16 @@ class HTTPMonitor:
                 captureVars=failure.captureVars
             )
         return failure
+
+    def _lookupProxyIp(self):
+        if not isip(self._ipAddr):
+            try:
+                self._ipAddr = getHostByName(self._ipAddr)
+            except Exception:
+                raise Failure(
+                    exc_value=RuntimeError("Unable to resolve hostname (%s) as IP address" % (self._ipAddr)),
+                    exc_type=RuntimeError
+                )
 
     def connect(self):
         if not isip(self._hostname):
