@@ -115,7 +115,7 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
         useSsl = ast.literal_eval(ds0.params['useSsl'])
         url = ds0.params['url']
         ipaddress = ds0.params['ipAddress']
-        onRedirect = ast.literal_eval(ds0.params.get('onRedirect', ""))
+        onRedirect = ast.literal_eval(ds0.params['onRedirect'])
         basicAuthUser = ds0.params['basicAuthUser']
         basicAuthPass = ds0.params['basicAuthPass']
         proxyAuthUser = ds0.params['proxyAuthUser']
