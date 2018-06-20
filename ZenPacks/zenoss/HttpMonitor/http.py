@@ -13,7 +13,7 @@ import sys
 import time
 from operator import xor
 
-from Products.ZenUtils.IpUtil import isip, getHostByName
+from Products.ZenUtils.IpUtil import isip
 from twisted.internet import reactor
 from twisted.internet.endpoints import TCP4ClientEndpoint
 from twisted.names import client, error, dns
@@ -145,11 +145,11 @@ class HTTPMonitor:
     def connect(self):
         if not isip(self._ipAddr):
             return client.lookupAddress(self._ipAddr).addCallbacks(
-                    self._lookupProxyIp, self._lookupProxyIpErr
+                self._lookupProxyIp, self._lookupProxyIpErr
             )
         if not isip(self._hostname):
             return client.lookupAddress(self._hostname).addCallbacks(
-                    self._getIp, self._lookupErr
+                self._getIp, self._lookupErr
             )
         return self.request()
 
