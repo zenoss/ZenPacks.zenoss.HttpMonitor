@@ -128,7 +128,25 @@ class HTTPMonitor:
             )
         return failure
 
+    def _lookupProxyIpErr(self, failure):
+        return Failure(
+            exc_value=RuntimeError("Unable to resolve hostname (%s) as IP address" % (self._ipAddr)),
+            exc_type=RuntimeError
+            )
+
+    def _lookupProxyIp(self, response):
+        if response:
+            for a in response[0]:
+                if a.payload.TYPE == dns.A:
+                    self._ipAddr = a.payload.dottedQuad()
+                    break
+        return self.connect()
+
     def connect(self):
+        if not isip(self._ipAddr):
+            return client.lookupAddress(self._ipAddr).addCallbacks(
+                self._lookupProxyIp, self._lookupProxyIpErr
+            )
         if not isip(self._hostname):
             return client.lookupAddress(self._hostname).addCallbacks(
                 self._getIp, self._lookupErr
