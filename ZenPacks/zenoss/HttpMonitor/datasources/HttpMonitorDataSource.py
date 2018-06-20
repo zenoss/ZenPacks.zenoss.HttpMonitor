@@ -116,13 +116,13 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
         url = ds0.params['url']
         ipaddress = ds0.params['ipAddress']
         try:
-            onRedirect = ast.literal_eval(ds0.params.get('onRedirect', False))
+            onRedirect = ast.literal_eval(ds0.params.get('onRedirect', "False"))
         except ValueError:
             if ds0.params.get('onRedirect', "") == "follow":
                 onRedirect = True
             else:
                 onRedirect = False
-        except:
+        except Exception:
             onRedirect = False
         basicAuthUser = ds0.params['basicAuthUser']
         basicAuthPass = ds0.params['basicAuthPass']
