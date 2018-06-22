@@ -15,7 +15,7 @@ The HttpMonitor ZenPack monitors the response times of HTTP server connection re
     <tbody>
         <tr>
             <td>Product</td>
-            <td>Zenoss platform 4.2.x, 5.x</td>
+            <td>Zenoss platform 4.2.x, 5.x, 6.x</td>
         </tr>
         <tr>
             <td>Required ZenPacks</td>
@@ -57,9 +57,9 @@ Follow these steps to enable monitoring:
 - Click the device name in the device list. The device overview page appears.
 - Expand Monitoring Templates, and then select Device from the left panel.
 - Select Bind Templates from the Action menu. The Bind Templates dialog appears.
-- Add the HttpMonitor template to the list of selected templates, and then click Submit. 
+- Add the HttpMonitor template to the list of selected templates, and then click Submit.
 Note: Prior to Zenoss 2.4, this template was not available. If your version is prior to Zenoss 2.4 you must create the template, 
-data source and graphs manually. For more information, refer to Zenoss Service Dynamics Resource Management Administration.
+data source and graphs manually. For more information, refer to Zenoss Service Dynamics Resource Manager Administration.
 
 The HttpMonitor template is added to the list of monitoring templates. You can now begin collecting Web server metrics from the device.
 
@@ -119,27 +119,27 @@ HttpMonitor Content Checking Data Source Options
     <tbody>
         <tr>
             <td>Port</td>
-            <td>The port to connect to HTTP server (default `80`).</td>
+            <td>The port to connect to HTTP server (default <code>80</code>).</td>
         </tr>
         <tr>
             <td>Use SSL</td>
-            <td>Use SSL for the connection (default `False`).</td>
+            <td>Use SSL for the connection (default <code>False</code>).</td>
         </tr>
         <tr>
             <td>URL</td>
-            <td>Address of the web page (default `/`).</td>
+            <td>Address of the web page (default <code>/</code>).</td>
         </tr>
         <tr>
             <td>Basic Auth User</td>
-            <td>If the website requires credentials, specify the username here (default `None`).</td>
+            <td>If the website requires credentials, specify the username here (default <code>None</code>).</td>
         </tr>
         <tr>
             <td>Basic Auth Password</td>
-            <td>Password for the user (default `None`).</td>
+            <td>Password for the user (default <code>None</code>).</td>
         </tr>
         <tr>
             <td>Follow redirect ?</td>
-            <td>If the web site returns an HTTP redirect, should the probe follow the redirect or create an event? (default `True`)</td>
+            <td>If the web site returns an HTTP redirect, should the probe follow the redirect or create an event? (default <code>True</code>)</td>
         </tr>
     </tbody>
 </table>
