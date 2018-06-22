@@ -1,13 +1,13 @@
 Releases
 --------
 
-Version 1.0.1-<a rel="nofollow" class="external" href="https://zenoss.leapfile.net">Download</a>
-:   Released on 2017/11/14
-:   Requires [PythonCollector ZenPack](http://zenoss.com/product/zenpacks/pythoncollector),[ZenPackLib ZenPack](http://zenoss.com/product/zenpacks/zenpacklib)
-:   Compatible with Zenoss Resource Manager 5.2 - 6.0
+Version 3.1.0
+:   Released on 2017/06/22
+:   Requires [PythonCollector ZenPack](http://zenoss.com/product/zenpacks/pythoncollector)
+:   Compatible with Zenoss Resource Manager 4.2.x - 6.2
 
-Version 1.0.0-<a rel="nofollow" class="external" href="https://zenoss.leapfile.net">Download</a>
-:   Released on 2017/09/22
-:   Requires [PythonCollector ZenPack](http://zenoss.com/product/zenpacks/pythoncollector),[ZenPackLib ZenPack](http://zenoss.com/product/zenpacks/zenpacklib)
-:   Compatible with Zenoss Resource Manager 5.2.x and 5.3.x
+Version 3.0.0
+:   Released on 2018/05/17
+:   Requires [PythonCollector ZenPack](http://zenoss.com/product/zenpacks/pythoncollector)
+:   Compatible with Zenoss Resource Manager 4.2.x - 6.2
 
