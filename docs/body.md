@@ -167,7 +167,7 @@ Daemons
 Changes
 -------
 
-3.1.0
+3.0.4
 
 - Fix issue with locally defined monitoring templates after upgrade (ZPS-3817)
 - Fix handles bad proxy hostnames (ZPS-3819)
