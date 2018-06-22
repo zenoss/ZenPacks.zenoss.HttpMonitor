@@ -7,7 +7,7 @@ try:
     with open('/tmp/README.html', 'r') as file:
         html = file.read()
 
-    html = re.sub('images/', '/sites/default/files/zenpack/Nutanix/', html)
+    html = re.sub('images/', '/sites/default/files/zenpack/HttpMonitor/', html)
 
     with open('/tmp/README.html', 'w') as file:
         file.write(html)
