@@ -1,12 +1,11 @@
-Nutanix ZenPack
+HTTP Monitor ZenPack
 =============================
 
-This ZenPack provides system monitoring of Nutanix.
+This ZenPack provides status and response time monitoring of HTTP URLs.
 
 Support
 ----------
 
-This ZenPack is included with commercial versions of Zenoss and enterprise
-support for this ZenPack is provided to Zenoss customers with an active
-subscription.
-
+This ZenPack is part of Zenoss Core. Open Source users receive community support for this 
+ZenPack via our online forums. Enterprise support for this ZenPack is provided to Zenoss 
+customers with an active subscription.
