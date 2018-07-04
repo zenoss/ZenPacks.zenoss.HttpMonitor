@@ -142,3 +142,40 @@ class TestHttpMonitor(TestCase):
         hm.makeURL()
         self.assertEqual(hm._reqURL, "http://tester.test/path")
         self.assertEqual(hm._proxyIp, "10.20.30.40")
+
+    def test_regex_not_found(self):
+        body = "Hello Web!"
+        hm = HTTPMonitor("10.20.30.40", "tester.test", "/path")
+        hm.regex("test", caseSensitive=False, invert=False)
+        self.assertEqual(hm._checkRegex(body), {'status': 'CRITICAL', 'msg': 'pattern not found'})
+
+    def test_regex_found(self):
+        body = "Hello Web!"
+        hm = HTTPMonitor("10.20.30.40", "tester.test", "/path")
+        hm.regex("Web", caseSensitive=False, invert=False)
+        self.assertEqual(hm._checkRegex(body), None)
+
+    def test_regex_invert(self):
+        body = "Hello Web!"
+        hm = HTTPMonitor("10.20.30.40", "tester.test", "/path")
+        hm.regex("NotFound", caseSensitive=False, invert=True)
+        self.assertEqual(hm._checkRegex(body), None)
+
+    def test_regex_caseSensitive(self):
+        body = "Hello Web!"
+        hm = HTTPMonitor("10.20.30.40", "tester.test", "/path")
+        hm.regex("hello", caseSensitive=True, invert=False)
+        self.assertEqual(hm._checkRegex(body), {'status': 'CRITICAL', 'msg': 'pattern not found'})
+
+    def test_regex_caseSensitive_invert(self):
+        body = "Hello Web!"
+        hm = HTTPMonitor("10.20.30.40", "tester.test", "/path")
+        hm.regex("hello", caseSensitive=True, invert=True)
+        self.assertEqual(hm._checkRegex(body), None)
+
+    def test_regex_wrong_expression(self):
+        body = "Hello Web!"
+        hm = HTTPMonitor("10.20.30.40", "tester.test", "/path")
+        hm.regex("[]*", caseSensitive=False, invert=False)
+        self.assertEqual(hm._checkRegex(body), {'status': 'CRITICAL',
+                                                'msg': "Could not compile regular expression: '[]*'"})

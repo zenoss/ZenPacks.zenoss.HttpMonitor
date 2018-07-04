@@ -150,6 +150,37 @@
                                      tal:content="here/url"/>
                         </tr>
                         <tr>
+                            <td class="tableheader">Regular Expression</td>
+                            <td class="tablevalues" tal:condition="editable">
+                                <input class="tablevalues" type="text" name="regex:string" size="40"
+                                        tal:attributes="value here/regex" />
+                            </td>
+                            <td class="tablevalues" tal:condition="not:editable" 
+                                    tal:content="here/regex"/>
+                        </tr>
+                        <tr>
+                            <td class="tableheader">Case Sensitive</td>
+                            <td class="tablevalues" tal:condition="editable">
+                                <select class="tablevalues" name="caseSensitive:boolean">
+                                    <option tal:repeat="e python:(True,False)" tal:content="e"
+                                            tal:attributes="value e; selected python:e==here.caseSensitive"/>
+                                </select>
+                            </td>
+                            <td class="tablevalues" tal:condition="not:editable" 
+                                    tal:content="here/caseSensitive"/>
+                        </tr>
+                        <tr>
+                            <td class="tableheader">Invert Expression</td>
+                            <td class="tablevalues" tal:condition="editable">
+                                <select class="tablevalues" name="invert:boolean">
+                                    <option tal:repeat="e python:(True,False)" tal:content="e"
+                                            tal:attributes="value e; selected python:e==here.invert"/>
+                                </select>
+                            </td>
+                            <td class="tablevalues" tal:condition="not:editable" 
+                                    tal:content="here/invert"/>
+                        </tr>
+                        <tr>
                             <td class="tableheader">Basic Auth User</td>
                             <td class="tablevalues" tal:condition="editable">
                                 <input class="tablevalues" type="text" name="basicAuthUser:string" size="40"
