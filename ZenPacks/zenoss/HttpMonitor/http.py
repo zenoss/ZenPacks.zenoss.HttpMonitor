@@ -200,9 +200,7 @@ class HTTPMonitor:
                     repr(self._regex)}
 
         match = bool(regex.search(body))
-        if (match and self._invert) or (not match and self._invert):
-            pass
-        elif (not match and not self._invert) or (match and self._invert):
+        if (not match and not self._invert) or (match and self._invert):
             if self._invert:
                 return {'status': 'CRITICAL', 'msg': 'pattern found'}
             else:
