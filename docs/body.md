@@ -208,11 +208,11 @@ Changes
 - Fix issue with locally defined monitoring templates after upgrade (ZPS-3817)
 - Fix handles bad proxy hostnames (ZPS-3819)
 - Adds unittests for regular expression
-- Adds `Case sensitive/Invert Expression/Regular Expression` propperties into DataSource configuration (ZPS-3867)
+- Adds `Case sensitive/Invert Expression/Regular Expression` properties into DataSource configuration (ZPS-3867)
 
 3.0.0
 
-- Removes `Case sensitive/Invert Expression/Regular Expressions` zPropperties from DataSource configuration
+- Removes `Case sensitive/Invert Expression/Regular Expressions` zProperties from DataSource configuration
 - Changes `Redirect Behavior` list to checkbox
 - Removes dependency library `check_http` from Nagios Plugins
 - Adds unittests
