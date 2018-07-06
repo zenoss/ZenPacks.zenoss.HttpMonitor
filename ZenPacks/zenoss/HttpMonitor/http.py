@@ -19,7 +19,7 @@ from twisted.internet.endpoints import TCP4ClientEndpoint
 from twisted.names import client, error, dns
 from twisted.python.failure import Failure
 from twisted.web.client import (
-    URI, RedirectAgent, Agent, ProxyAgent, readBody, PartialDownloadError
+    URI, RedirectAgent, Agent, ProxyAgent, readBody, PartialDownloadError, Response
 )
 from twisted.web.http_headers import Headers
 
@@ -110,8 +110,13 @@ class HTTPMonitor:
         agent = RedirectAgent(agent) if self._follow else agent
         return agent.request("GET", self._reqURL, self._headers)
 
-    def _bodysize(self, body=""):
-        return sys.getsizeof(body)
+    def _bodysize(self, body="", response=""):
+        heades_len = 0
+        if isinstance(response, Response):
+            headers = response.headers.getAllRawHeaders()
+            for k, v in headers:
+                heades_len += len(k+": ") + len(v[0]+"\r\n")
+        return len(body)+heades_len
 
     def _pageErr(self, failure):
         if failure.type == PartialDownloadError:
@@ -176,7 +181,7 @@ class HTTPMonitor:
         res['code'] = self._response.code
         res['message'] = self._response.phrase
         res['time'] = time.time() - self._startTime
-        res['size'] = self._bodysize(body+str(res['headers']))
+        res['size'] = self._bodysize(body, self._response)
         if self._regex:
             regex = self._checkRegex(body)
             if regex and regex.get('status', ""):
