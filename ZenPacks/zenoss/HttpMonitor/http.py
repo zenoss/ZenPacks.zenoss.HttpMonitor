@@ -19,7 +19,7 @@ from twisted.internet.endpoints import TCP4ClientEndpoint
 from twisted.names import client, error, dns
 from twisted.python.failure import Failure
 from twisted.web.client import (
-    URI, RedirectAgent, Agent, ProxyAgent, readBody, PartialDownloadError
+    URI, RedirectAgent, Agent, ProxyAgent, readBody, PartialDownloadError, Response
 )
 from twisted.web.http_headers import Headers
 
@@ -45,6 +45,10 @@ class HTTPMonitor:
         self._headers = Headers({b"User-Agent": [b"Zenoss HttpMonitor"]})
         self._body = ""
         self._hostnameIp = list()
+        self._regex = ""
+        self._caseSensitive = False
+        self._invert = False
+
 
     def _getIp(self, response):
         if response:
@@ -106,8 +110,13 @@ class HTTPMonitor:
         agent = RedirectAgent(agent) if self._follow else agent
         return agent.request("GET", self._reqURL, self._headers)
 
-    def _bodysize(self, body=""):
-        return sys.getsizeof(body)
+    def _bodysize(self, body="", response=""):
+        headers_len = 0
+        if isinstance(response, Response):
+            headers = response.headers.getAllRawHeaders()
+            for k, v in headers:
+                headers_len += len(k+": ") + len(v[0]+"\r\n")
+        return len(body)+headers_len
 
     def _pageErr(self, failure):
         if failure.type == PartialDownloadError:
@@ -164,13 +173,40 @@ class HTTPMonitor:
         self._response = response
         return readBody(response).addErrback(self._pageErr)
 
-    def _answer(self, body):
+    def _answer(self, body=""):
         res = dict()
-        body = body if not self._body else self._body
+        body = str(body if not self._body else self._body)
         res['body'] = body
         res['headers'] = self._response.headers
         res['code'] = self._response.code
         res['message'] = self._response.phrase
         res['time'] = time.time() - self._startTime
-        res['size'] = self._bodysize(body)
+        res['size'] = self._bodysize(body, self._response)
+        if self._regex:
+            regex = self._checkRegex(body)
+            if regex and regex.get('status', ""):
+                res['msg'] = regex
         return res
+
+    def regex(self, regex, caseSensitive=False, invert=False):
+        self._regex = regex
+        self._caseSensitive = caseSensitive
+        self._invert = invert
+
+    def _checkRegex(self, body=""):
+        import re
+        try:
+            if self._caseSensitive:
+                regex = re.compile(self._regex)
+            else:
+                regex = re.compile(self._regex, re.IGNORECASE)
+        except re.error as err:
+            return {'status': 'CRITICAL', 'msg': 'Could not compile regular expression: '+
+                    repr(self._regex)}
+
+        match = bool(regex.search(body))
+        if (not match and not self._invert) or (match and self._invert):
+            if self._invert:
+                return {'status': 'CRITICAL', 'msg': 'pattern found'}
+            else:
+                return {'status': 'CRITICAL', 'msg': 'pattern not found'}

@@ -32,6 +32,10 @@ class HttpMonitorDataSourceInfo(RRDDataSourceInfo):
     proxyAuthUser = ProxyProperty('proxyAuthUser')
     proxyAuthPassword = ProxyProperty('proxyAuthPassword')
 
+    regex = ProxyProperty('regex')
+    caseSensitive = ProxyProperty('caseSensitive')
+    invert = ProxyProperty('invert')
+
     @property
     def testable(self):
         """

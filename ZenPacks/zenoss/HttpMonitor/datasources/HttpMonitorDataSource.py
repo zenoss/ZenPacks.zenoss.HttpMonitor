@@ -45,6 +45,9 @@ class HttpMonitorDataSource(PythonDataSource):
     onRedirect = True
     proxyAuthUser = ''
     proxyAuthPassword = ''
+    regex = ''
+    caseSensitive = False
+    invert = False
     _properties = PythonDataSource._properties + (
         {'id': 'hostname', 'type': 'string', 'mode': 'w'},
         {'id': 'ipAddress', 'type': 'string', 'mode': 'w'},
@@ -57,6 +60,9 @@ class HttpMonitorDataSource(PythonDataSource):
         {'id': 'timeout', 'type': 'int', 'mode': 'w'},
         {'id': 'proxyAuthUser', 'type': 'string', 'mode': 'w'},
         {'id': 'proxyAuthPassword', 'type': 'string', 'mode': 'w'},
+        {'id': 'regex', 'type': 'string', 'mode': 'w'},
+        {'id': 'caseSensitive', 'type': 'boolean', 'mode': 'w'},
+        {'id': 'invert', 'type': 'boolean', 'mode': 'w'},
     )
 
 
@@ -105,6 +111,15 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
         params['timeout'] = datasource.talesEval(
             datasource.timeout, context)
 
+        params['regex'] = datasource.talesEval(
+            datasource.regex, context)
+
+        params['caseSensitive'] = datasource.talesEval(
+            datasource.caseSensitive, context)
+
+        params['invert'] = datasource.talesEval(
+            datasource.invert, context)
+
         return params
 
     def collect(self, config):
@@ -115,6 +130,10 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
         useSsl = ast.literal_eval(ds0.params['useSsl'])
         url = ds0.params['url']
         ipaddress = ds0.params['ipAddress']
+        regex = ds0.params['regex']
+        caseSensitive = ds0.params['caseSensitive']
+        invert = ds0.params['invert']
+
         try:
             onRedirect = ast.literal_eval(ds0.params.get('onRedirect', "False"))
         except ValueError:
@@ -135,6 +154,8 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
             chttp.useProxy(proxyAuthUser, proxyAuthPassword)
         if basicAuthUser:
             chttp.useAuth(basicAuthUser, basicAuthPass)
+        if regex:
+            chttp.regex(regex, ast.literal_eval(caseSensitive), ast.literal_eval(invert))
         return chttp.connect()
 
     def onSuccess(self, results, config):
@@ -143,10 +164,20 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
         perfData['time'] = results['time']
         perfData['size'] = results['size']
         ds0 = config.datasources[0]
+        if results.get('msg', ""):
+            regex = results['msg'].get('msg')+" -"
+            state = results['msg'].get('status')
+        else:
+            state = "OK"
+            regex = ""
+        message = ("HTTP {0}: HTTP/1.1 {2} {1} "
+                   "- {5} {3} bytes in {4:.3f} second response time "
+                   "|time={4:.3f}s;;;0.000000 size={3}B;;;0").format(state, results['message'],
+                                                                     results['code'], results['size'],
+                                                                     results['time'], regex)
 
-        message = ("HTTP OK: HTTP/1.1 200 OK"
-                   "- {0} bytes in {1:.3f} second response time "
-                   "|time={1:.3f}s;;;0.000000 size={0}B;;;0").format(results['size'], results['time'])
+        if state != "OK":
+            raise Exception(message)
 
         log.debug('{} {}'.format(config.id, message))
 
