@@ -1,10 +1,13 @@
 Background
 ----------
+The ZenPacks.zenoss.HttpMonitor ZenPack monitors the response times of HTTP server connection requests, and determines whether specific content exists on a Web page.
 
-The HttpMonitor ZenPack monitors the response times of HTTP server connection requests.
+Support
+-------
+This ZenPack is part of Zenoss Core. Open Source users receive community support for this ZenPack via our online forums. Enterprise support for this ZenPack is provided to Zenoss customers with an active subscription.
 
-### Prerequisites
-
+Prerequisites
+-------------
 <table data-table="resource" style="color: rgb(61, 61, 61); line-height: 175%; background: transparent;">
     <thead>
         <tr data-table-header="togglable">
@@ -25,8 +28,8 @@ The HttpMonitor ZenPack monitors the response times of HTTP server connection re
 </table>
 
 
-### Gallery
-
+Gallery
+-------
 [defaultConfiguration.png]: images/defaultConfiguration.png "Default Configuration" class=gallery
 [ExampleGraph.png]: images/ExampleGraph.png "Example Graph" class=gallery
 [ProxyConfiguration.png]: images/ProxyConfiguration.png "Proxy Configuration" class=gallery
@@ -39,7 +42,6 @@ The HttpMonitor ZenPack monitors the response times of HTTP server connection re
 
 Features
 --------
-
 HttpMonitor features include:
 
 - Monitors HTTP response time
@@ -47,10 +49,10 @@ HttpMonitor features include:
 - Monitors HTTP response code
 - Monitors HTTP through Proxy server
 - Monitors HTTP with Basic access authentication
+- Monitors HTTP specific content on the Web page
 
 Enable Monitoring
 -----------------
-
 Follow these steps to enable monitoring:
 
 - Select Infrastructure from the navigation bar.
@@ -66,7 +68,6 @@ The HttpMonitor template is added to the list of monitoring templates. You can n
 
 Check for a Specific URL or Specify Security Settings
 -----------------------------------------------------
-
 - Select Infrastructure from the navigation bar.
 - Click the device name in the device list. The device overview page appears.
 - Expand Monitoring Templates, and then select Device from the left panel.
@@ -108,7 +109,6 @@ Tuning for Site Responsiveness
 
 HttpMonitor Content Checking Data Source Options
 ------------------------------------------------
-
 <table data-table="resource" style="color: rgb(61, 61, 61); line-height: 175%; background: transparent;">
     <thead>
         <tr data-table-header="togglable">
@@ -144,9 +144,46 @@ HttpMonitor Content Checking Data Source Options
     </tbody>
 </table>
 
+
+Check for Specific Content on the Web Page
+------------------------------------------
+This procedure allows Zenoss platform to create an event if content at the web page does not match the expected output.
+
+- Select Infrastructure from the navigation bar.
+- Click the device name in the device list. The device overview page appears.
+- Expand Monitoring Templates, and then select Device from the left panel.
+- Create a local copy of the template.
+- Select the newly created local template copy.
+- Select the HttpMonitor data source, and then select View and Edit Details from the Action menu. The Edit Data Source dialog appears.
+- Change data source options as needed, and then click Save.
+
+HTTPMonitor Content Checking Data Source Options
+<table data-table="resource" style="color: rgb(61, 61, 61); line-height: 175%; background: transparent;">
+    <thead>
+        <tr data-table-header="togglable">
+            <td>Option</td>
+            <td>Description</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Regular Expression</td>
+            <td>A Python regular expression to match text in the web page.</td>
+        </tr>
+        <tr>
+            <td>Case Sensitive</td>
+            <td>Is the regular expression case-sensitive or not?</td>
+        </tr>
+        <tr>
+            <td>Invert Expression</td>
+            <td>If you would like to test to see if the web page does not contain content matched by a regular expression, check this box.</td>
+        </tr>
+    </tbody>
+</table>
+
+
 Daemons
 -------
-
 <table data-table="resource" style="color: rgb(61, 61, 61); line-height: 175%; background: transparent;">
     <thead>
         <tr data-table-header="togglable">
@@ -166,15 +203,16 @@ Daemons
 
 Changes
 -------
-
 3.0.4
 
 - Fix issue with locally defined monitoring templates after upgrade (ZPS-3817)
 - Fix handles bad proxy hostnames (ZPS-3819)
+- Adds unittests for regular expression
+- Adds `Case sensitive/Invert Expression/Regular Expression` properties into DataSource configuration (ZPS-3867)
 
 3.0.0
 
-- Removes `Case sensitive/Invert Expression/Regular Expressions` zPropperties from DataSource configuration
+- Removes `Case sensitive/Invert Expression/Regular Expressions` zProperties from DataSource configuration
 - Changes `Redirect Behavior` list to checkbox
 - Removes dependency library `check_http` from Nagios Plugins
 - Adds unittests
