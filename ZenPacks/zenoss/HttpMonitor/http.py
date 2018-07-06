@@ -111,12 +111,12 @@ class HTTPMonitor:
         return agent.request("GET", self._reqURL, self._headers)
 
     def _bodysize(self, body="", response=""):
-        heades_len = 0
+        headers_len = 0
         if isinstance(response, Response):
             headers = response.headers.getAllRawHeaders()
             for k, v in headers:
-                heades_len += len(k+": ") + len(v[0]+"\r\n")
-        return len(body)+heades_len
+                headers_len += len(k+": ") + len(v[0]+"\r\n")
+        return len(body)+headers_len
 
     def _pageErr(self, failure):
         if failure.type == PartialDownloadError:
