@@ -42,7 +42,7 @@ class HttpMonitorDataSource(PythonDataSource):
     url = '/'
     basicAuthUser = ''
     basicAuthPass = ''
-    onRedirect = True
+    onRedirectOptions = ('ok', 'fail', 'follow', 'sticky', 'stickyport')
     proxyAuthUser = ''
     proxyAuthPassword = ''
     regex = ''
@@ -56,7 +56,7 @@ class HttpMonitorDataSource(PythonDataSource):
         {'id': 'url', 'type': 'string', 'mode': 'w'},
         {'id': 'basicAuthUser', 'type': 'string', 'mode': 'w'},
         {'id': 'basicAuthPass', 'type': 'string', 'mode': 'w'},
-        {'id': 'onRedirect', 'type': 'boolean', 'mode': 'w'},
+        {'id': 'onRedirect', 'type':'string', 'mode':'w'},
         {'id': 'timeout', 'type': 'int', 'mode': 'w'},
         {'id': 'proxyAuthUser', 'type': 'string', 'mode': 'w'},
         {'id': 'proxyAuthPassword', 'type': 'string', 'mode': 'w'},
@@ -133,16 +133,13 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
         regex = ds0.params['regex']
         caseSensitive = ds0.params['caseSensitive']
         invert = ds0.params['invert']
+        onRedirect = ds0.params['onRedirect']
 
-        try:
-            onRedirect = ast.literal_eval(ds0.params.get('onRedirect', "False"))
-        except ValueError:
-            if ds0.params.get('onRedirect', "") == "follow":
-                onRedirect = True
-            else:
-                onRedirect = False
-        except Exception:
-            onRedirect = False
+        onRedirect = str(onRedirect)
+
+        if onRedirect in ('False', ''):
+            onRedirect = "fail"
+
         basicAuthUser = ds0.params['basicAuthUser']
         basicAuthPass = ds0.params['basicAuthPass']
         proxyAuthUser = ds0.params['proxyAuthUser']
