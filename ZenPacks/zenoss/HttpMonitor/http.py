@@ -17,7 +17,6 @@ from Products.ZenUtils.IpUtil import isip
 from twisted.internet import reactor
 from twisted.internet.endpoints import TCP4ClientEndpoint
 from twisted.names import client, error, dns
-from twisted.web import error as weberror
 from twisted.python.failure import Failure
 from twisted.web._newclient import ResponseFailed
 from twisted.web.client import (
@@ -136,9 +135,8 @@ class HTTPMonitor:
                 timeout=self._timeout
             )
             agent = ProxyAgent(endpoint)
-        log.info(self._reqURL)
         agent = RedirectAgentZ(agent, onRedirect=self._follow, port=self._port, proxy=self._proxyIp) \
-                if self._follow != "ok" else agent
+                if self._follow in ('follow', 'sticky', 'stickyport') else agent
         return agent.request("GET", self._reqURL, self._headers)
 
     def _bodysize(self, body="", response=""):
@@ -217,6 +215,15 @@ class HTTPMonitor:
             regex = self._checkRegex(body)
             if regex and regex.get('status', ""):
                 res['msg'] = regex
+
+        if self._follow in ('ok', 'fail'):
+            if self._follow == "ok":
+                # we don't have to do anything with it
+                pass
+            if self._follow == "fail":
+                if self._response.code in (301,302,303,307,308):
+                    res['msg'] = {'status': 'CRITICAL', 'msg': ''}
+
         return res
 
     def regex(self, regex, caseSensitive=False, invert=False):
