@@ -18,7 +18,6 @@ from twisted.internet import reactor
 from twisted.internet.endpoints import TCP4ClientEndpoint
 from twisted.names import client, error, dns
 from twisted.python.failure import Failure
-from twisted.web._newclient import ResponseFailed
 from twisted.web.client import (
     URI, RedirectAgent, Agent, ProxyAgent, readBody, PartialDownloadError, Response
 )
