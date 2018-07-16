@@ -232,9 +232,6 @@ class HTTPMonitor:
                 res['msg'] = regex
 
         if self._follow in ('ok', 'fail'):
-            if self._follow == "ok":
-                # we don't have to do anything with it
-                pass
             if self._follow == "fail":
                 if self._response.code in (301,302,303,307,308):
                     res['msg'] = {'status': 'CRITICAL', 'msg': ''}
