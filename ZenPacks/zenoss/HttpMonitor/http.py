@@ -231,10 +231,9 @@ class HTTPMonitor:
             if regex and regex.get('status', ""):
                 res['msg'] = regex
 
-        if self._follow in ('ok', 'fail'):
-            if self._follow == "fail":
-                if self._response.code in (301,302,303,307,308):
-                    res['msg'] = {'status': 'CRITICAL', 'msg': ''}
+        if self._follow == "fail":
+            if self._response.code in (301,302,303,307,308):
+                res['msg'] = {'status': 'CRITICAL', 'msg': ''}
 
         return res
 
