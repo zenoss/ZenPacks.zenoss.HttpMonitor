@@ -8,8 +8,8 @@
 ##############################################################################
 
 from unittest import TestCase
-
-from ZenPacks.zenoss.HttpMonitor.http import HTTPMonitor
+from twisted.web.client import Agent
+from ZenPacks.zenoss.HttpMonitor.http import HTTPMonitor, RedirectAgentZ
 
 # ipAddr, hostname, url="/", port=80, timeout=5, ssl=False, follow=True):
 
@@ -179,3 +179,63 @@ class TestHttpMonitor(TestCase):
         hm.regex("[]*", caseSensitive=False, invert=False)
         self.assertEqual(hm._checkRegex(body), {'status': 'CRITICAL',
                                                 'msg': "Could not compile regular expression: '[]*'"})
+
+    def test_redirect_follow(self):
+        location = "http://example.org/"
+        hm = HTTPMonitor("10.20.30.40", "tester.test", "/path")
+        hm._follow = "follow"
+        hm._proxyIp = ""
+        hm._hostnameIp.append("10.20.30.40")
+        hm.makeURL()
+        agent = RedirectAgentZ(Agent, onRedirect=hm._follow, port=hm._port, proxy=hm._proxyIp)
+        self.assertEqual(agent._resolveLocation(hm._reqURL, location), "http://example.org/")
+
+    def test_redirect_sticky(self):
+        location = "http://example.org/"
+        hm = HTTPMonitor("10.20.30.40", "tester.test", "/path")
+        hm._follow = "sticky"
+        hm._proxyIp = ""
+        hm._hostnameIp.append("10.20.30.40")
+        hm.makeURL()
+        agent = RedirectAgentZ(Agent, onRedirect=hm._follow, port=hm._port, proxy=hm._proxyIp)
+        self.assertEqual(agent._resolveLocation(hm._reqURL, location), "http://tester.test/")
+
+    def test_redirect_stickyport(self):
+        location = "http://example.org/"
+        hm = HTTPMonitor("10.20.30.40", "tester.test", "/path", 8080)
+        hm._follow = "stickyport"
+        hm._proxyIp = ""
+        hm._hostnameIp.append("10.20.30.40")
+        hm.makeURL()
+        agent = RedirectAgentZ(Agent, onRedirect=hm._follow, port=hm._port, proxy=hm._proxyIp)
+        self.assertEqual(agent._resolveLocation(hm._reqURL, location), "http://example.org:8080/")
+
+    def test_redirect_stickyport_443(self):
+        location = "http://example.org/"
+        hm = HTTPMonitor("10.20.30.40", "tester.test", "/path", 443)
+        hm._follow = "stickyport"
+        hm._proxyIp = ""
+        hm._hostnameIp.append("10.20.30.40")
+        hm.makeURL()
+        agent = RedirectAgentZ(Agent, onRedirect=hm._follow, port=hm._port, proxy=hm._proxyIp)
+        self.assertEqual(agent._resolveLocation(hm._reqURL, location), "http://example.org:443/")
+
+    def test_redirect_stickyport_with_proxy(self):
+        location = "http://example.org/"
+        hm = HTTPMonitor("10.20.30.40", "tester.test", "http://tester.test:8888/path", 3128)
+        hm._follow = "stickyport"
+        hm._proxyIp = "10.10.10.10"
+        hm._hostnameIp.append("10.20.30.50")
+        hm.makeURL()
+        agent = RedirectAgentZ(Agent, onRedirect=hm._follow, port=hm._port, proxy=hm._proxyIp)
+        self.assertEqual(agent._resolveLocation(hm._reqURL, location), "http://example.org:8888/")
+
+    def test_redirect_sticky_with_proxy(self):
+        location = "http://example.org/"
+        hm = HTTPMonitor("10.20.30.40", "tester.test", "http://tester.test:8888/path", 3128)
+        hm._follow = "sticky"
+        hm._proxyIp = "10.10.10.10"
+        hm._hostnameIp.append("10.20.30.50")
+        hm.makeURL()
+        agent = RedirectAgentZ(Agent, onRedirect=hm._follow, port=hm._port, proxy=hm._proxyIp)
+        self.assertEqual(agent._resolveLocation(hm._reqURL, location), "http://tester.test/")

@@ -26,7 +26,7 @@ from twisted.web.http_headers import Headers
 log = logging.getLogger('zen.HttpMonitor')
 
 class RedirectAgentZ(RedirectAgent):
-    def __init__(self, agent, onRedirect="ok", port=80, proxy=""):
+    def __init__(self, agent, onRedirect, port=80, proxy=""):
         RedirectAgent.__init__(self, agent, 20)
         self._onRedirect = onRedirect
         self._port = port
@@ -40,13 +40,27 @@ class RedirectAgentZ(RedirectAgent):
 
         if self._onRedirect == "sticky":
             location = location.replace(go_to[0], old_url[0])
+        elif self._onRedirect == "stickyport":
+            def _preparePort(url):
+                urlsplited = urlsplit(url)[1].split(":")
+                scheme = urlsplit(url).scheme \
+                    if urlsplit(url).scheme else "http"
+                if scheme == "http":
+                    url = url.replace(urlsplited[0], urlsplited[0]+":80")
+                elif scheme == "https":
+                    url = url.replace(urlsplited[0], urlsplited[0]+":443")
+                return url
 
-        if self._onRedirect == "stickyport":
+            if len(old_url) != 2:
+                requestURI = _preparePort(requestURI)
+                old_url = urlsplit(requestURI)[1].split(":")
+            if len(go_to) != 2:
+                location = _preparePort(location)
+                go_to = urlsplit(location)[1].split(":")
             if not self._proxy:
-                location = location.replace(go_to[1], self._port)
+                location = location.replace(go_to[1], str(self._port))
             else:
                 location = location.replace(go_to[1], old_url[1])
-
         location = _urljoin(requestURI, location)
         log.debug("Locating to URL: %s" % location)
         return location
@@ -134,8 +148,10 @@ class HTTPMonitor:
                 timeout=self._timeout
             )
             agent = ProxyAgent(endpoint)
-        agent = RedirectAgentZ(agent, onRedirect=self._follow, port=self._port, proxy=self._proxyIp) \
-                if self._follow in ('follow', 'sticky', 'stickyport') else agent
+        if self._follow in ('follow', 'sticky', 'stickyport'):
+            agent = RedirectAgentZ(
+                agent, onRedirect=self._follow, port=self._port, proxy=self._proxyIp
+            )
         return agent.request("GET", self._reqURL, self._headers)
 
     def _bodysize(self, body="", response=""):

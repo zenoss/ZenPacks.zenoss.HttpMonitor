@@ -139,6 +139,8 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
 
         if onRedirect in ('False', ''):
             onRedirect = "fail"
+        elif onRedirect == "True":
+            onRedirect = "follow"
 
         basicAuthUser = ds0.params['basicAuthUser']
         basicAuthPass = ds0.params['basicAuthPass']
