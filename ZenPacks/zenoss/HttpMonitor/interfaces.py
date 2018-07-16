@@ -23,7 +23,8 @@ class IHttpMonitorDataSourceInfo(IRRDDataSourceInfo):
     useSsl = schema.Bool(title=_t(u'Use SSL?'), group=_t('HTTP Monitor'))
     basicAuthUser = schema.TextLine(title=_t(u'Basic Auth User'), group=_t('HTTP Monitor'))
     basicAuthPass = schema.Password(title=_t(u'Basic Auth Password'), group=_t('HTTP Monitor'))
-    onRedirect = schema.Bool(title=_t(u'Follow redirect?'), group=_t('HTTP Monitor'))
+    onRedirect = schema.Choice(title=_t(u'Redirect Behavior'),
+                                vocabulary='httpMonitorRedirectVocabulary', group=_t('HTTP Monitor'))
     proxyAuthUser = schema.TextLine(title=_t(u'Proxy User'), group=_t('Proxy Credentials'))
     proxyAuthPassword = schema.Password(title=_t(u'Proxy Password'), group=_t('Proxy Credentials'))
     regex = schema.TextLine(title=_t(u'Regular Expression'), group=_t('HTTP Monitor'))
