@@ -201,9 +201,10 @@
                         <tr>
                             <td class="tableheader">Redirect Behavior</td>
                             <td class="tablevalues" tal:condition="editable">
-                                <select class="tablevalues" name="onRedirect:boolean">
-                                    <option tal:repeat="e python:(True,False)" tal:content="e"
-                                             tal:attributes="value e; selected python:e==here.onRedirect"/>
+                                <select class="tablevalues" name="onRedirect:string">
+                                    <option tal:repeat="o here/onRedirectOptions"
+                                            tal:content="o"
+                                            tal:attributes="value o; selected python:o==here.onRedirect"/>
                                 </select>
                             </td>
                             <td class="tablevalues" tal:condition="not:editable"
