@@ -14,16 +14,23 @@ import time
 from operator import xor
 
 from Products.ZenUtils.IpUtil import isip
-from twisted.internet import reactor
+from twisted.internet import reactor, ssl
 from twisted.internet.endpoints import TCP4ClientEndpoint
 from twisted.names import client, error, dns
 from twisted.python.failure import Failure
 from twisted.web.client import (
     URI, RedirectAgent, Agent, ProxyAgent, readBody, PartialDownloadError, Response
 )
+from twisted.web.iweb import IPolicyForHTTPS
 from twisted.web.http_headers import Headers
+from zope.interface import implementer
 
 log = logging.getLogger('zen.HttpMonitor')
+
+@implementer(IPolicyForHTTPS)
+class NoVerifyContextFactory(object):
+    def creatorForNetloc(self, hostname, port):
+        return ssl.CertificateOptions(verify=False)
 
 class RedirectAgentZ(RedirectAgent):
     def __init__(self, agent, onRedirect, port=80, proxy=""):
@@ -141,7 +148,8 @@ class HTTPMonitor:
 
     def _agent(self):
         if not self._proxyIp:
-            agent = Agent(self._reactor, connectTimeout=self._timeout)
+            agent = Agent(self._reactor, contextFactory=NoVerifyContextFactory(),
+                            connectTimeout=self._timeout)
         else:
             endpoint = TCP4ClientEndpoint(
                 reactor=self._reactor, host=self._ipAddr, port=self._port,
