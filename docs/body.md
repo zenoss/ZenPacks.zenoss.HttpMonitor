@@ -207,8 +207,9 @@ Changes
 
 - Fix issue with locally defined monitoring templates after upgrade (ZPS-3817)
 - Fix handles bad proxy hostnames (ZPS-3819)
-- Adds unittests for regular expression
+- Adds unittests for regular expression and redirect behavior
 - Adds `Case sensitive/Invert Expression/Regular Expression` properties into DataSource configuration (ZPS-3867)
+- Adds `Redirect Behavior` options `ok/fail/follow/sticky/stickyport` (ZPS-3867)
 
 3.0.0
 
