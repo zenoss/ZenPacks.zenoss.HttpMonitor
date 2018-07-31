@@ -42,6 +42,7 @@ class HttpMonitorDataSource(PythonDataSource):
     url = '/'
     basicAuthUser = ''
     basicAuthPass = ''
+    onRedirect = 'follow'
     onRedirectOptions = ('ok', 'fail', 'follow', 'sticky', 'stickyport')
     proxyAuthUser = ''
     proxyAuthPassword = ''
