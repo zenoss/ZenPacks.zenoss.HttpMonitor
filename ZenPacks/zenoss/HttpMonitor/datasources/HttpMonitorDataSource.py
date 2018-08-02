@@ -66,6 +66,12 @@ class HttpMonitorDataSource(PythonDataSource):
         {'id': 'invert', 'type': 'boolean', 'mode': 'w'},
     )
 
+    def addDataPoints(self):
+        if not self.datapoints._getOb('time', None):
+            self.manage_addRRDDataPoint('time')
+        if not self.datapoints._getOb('size', None):
+            self.manage_addRRDDataPoint('size')
+
 
 class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
 
