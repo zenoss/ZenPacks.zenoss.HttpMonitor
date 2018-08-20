@@ -218,7 +218,7 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
             'summary': message,
             'message': message,
             'device': config.id,
-            'severity': ZenEventClasses.Error,
+            'severity': ds0.severity,
             'eventClass': ds0.eventClass
         })
 
