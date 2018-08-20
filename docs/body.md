@@ -108,7 +108,13 @@ HttpMonitor Content Checking Data Source Options
         </tr>
         <tr>
             <td>Redirect Behavior</td>
-            <td>If the web site returns an HTTP redirect, should the probe follow the redirect or create an event? Possible event severities are OK, Warning, and Critical. (default <code>follow</code>)</td>
+            <td>If the web site returns an HTTP redirect, should the probe follow the redirect or create an event? (default <code>follow</code>)<br/>
+                <u>ok</u> - Do not follow the redirect and return a positive response<br/>
+                <u>fail</u> - Do not follow the redirect and return a negative response<br/>
+                <u>follow</u> - Follow redirection<br/>
+                <u>stickyhost</u> - Use original hostname (or IP address) on redirect<br/>
+                <u>stickyhostport</u> - Use original hostname and port on redirect
+            </td>
         </tr>
     </tbody>
 </table>
@@ -150,7 +156,7 @@ This procedure allows Zenoss platform to create an event if content at the web p
 
 - Select Infrastructure from the navigation bar.
 - Click the device name in the device list. The device overview page appears.
-- Expand Monitoring Templates, and then select Device from the left panel.
+- Expand Monitoring Templates, and then select HttpMonitor from the left panel.
 - Create a local copy of the template.
 - Select the newly created local template copy.
 - Select the HttpMonitor data source, and then select View and Edit Details from the Action menu. The Edit Data Source dialog appears.
