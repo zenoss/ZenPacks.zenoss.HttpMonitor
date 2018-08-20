@@ -70,42 +70,11 @@ Check for a Specific URL or Specify Security Settings
 -----------------------------------------------------
 - Select Infrastructure from the navigation bar.
 - Click the device name in the device list. The device overview page appears.
-- Expand Monitoring Templates, and then select Device from the left panel.
+- Expand Monitoring Templates, and then select HttpMonitor from the left panel.
 - Create a local copy of the template.
 - Select the newly created local template copy.
 - Select the HttpMonitor data source, and then select View and Edit Details from the Action menu. The Edit Data Source dialog appears.
 - Change data source options as needed, and then click Save.
-
-
-Tuning for Site Responsiveness
-------------------------------
-- Select Infrastructure from the navigation bar.
-- Click the device name in the device list. The device overview page appears.
-- Expand Monitoring Templates, and then select Device from the left panel.
-- Create a local copy of the template.
-- Select the newly created local template copy.
-- Select the HttpMonitor data source, and then select View and Edit Details from the Action menu. The Edit Data Source dialog appears.
-- Change data source options as needed, and then click Save.
-
-<table data-table="resource" style="color: rgb(61, 61, 61); line-height: 175%; background: transparent;">
-    <thead>
-        <tr data-table-header="togglable">
-            <td>Option</td>
-            <td>Description</td>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>Timeout (seconds)</td>
-            <td>Seconds before connection times out (default: 60)</td>
-        </tr>
-        <tr>
-            <td>Cycle Time (seconds)</td>
-            <td>Number of seconds between collection cycles (default: 300 or five minutes)</td>
-        </tr>
-    </tbody>
-</table>
-
 
 HttpMonitor Content Checking Data Source Options
 ------------------------------------------------
@@ -138,8 +107,38 @@ HttpMonitor Content Checking Data Source Options
             <td>Password for the user (default <code>None</code>).</td>
         </tr>
         <tr>
-            <td>Follow redirect ?</td>
-            <td>If the web site returns an HTTP redirect, should the probe follow the redirect or create an event? (default <code>True</code>)</td>
+            <td>Redirect Behavior</td>
+            <td>If the web site returns an HTTP redirect, should the probe follow the redirect or create an event? Possible event severities are OK, Warning, and Critical. (default <code>follow</code>)</td>
+        </tr>
+    </tbody>
+</table>
+
+
+Tuning for Site Responsiveness
+------------------------------
+- Select Infrastructure from the navigation bar.
+- Click the device name in the device list. The device overview page appears.
+- Expand Monitoring Templates, and then select HttpMonitor from the left panel.
+- Create a local copy of the template.
+- Select the newly created local template copy.
+- Select the HttpMonitor data source, and then select View and Edit Details from the Action menu. The Edit Data Source dialog appears.
+- Change data source options as needed, and then click Save.
+
+<table data-table="resource" style="color: rgb(61, 61, 61); line-height: 175%; background: transparent;">
+    <thead>
+        <tr data-table-header="togglable">
+            <td>Option</td>
+            <td>Description</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Timeout (seconds)</td>
+            <td>Seconds before connection times out (default: 60)</td>
+        </tr>
+        <tr>
+            <td>Cycle Time (seconds)</td>
+            <td>Number of seconds between collection cycles (default: 300 or five minutes)</td>
         </tr>
     </tbody>
 </table>
