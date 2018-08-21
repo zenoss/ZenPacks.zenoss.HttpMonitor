@@ -70,9 +70,9 @@ Check for a Specific URL or Specify Security Settings
 -----------------------------------------------------
 - Select Infrastructure from the navigation bar.
 - Click the device name in the device list. The device overview page appears.
-- Expand Monitoring Templates, and then select HttpMonitor from the left panel.
-- Create a local copy of the template.
-- Select the newly created local template copy.
+- Select the 'Gear' icon on the bottom panel and select the "Override Template Here" option.
+- Choose "HttpMonitor (/)" template and select "Submit". This will create a local copy of the default HttpMonitor template for only this device.
+- Select the newly created "HttpMonitor (Locally Defined)" template.
 - Select the HttpMonitor data source, and then select View and Edit Details from the Action menu. The Edit Data Source dialog appears.
 - Change data source options as needed, and then click Save.
 
@@ -124,9 +124,9 @@ Tuning for Site Responsiveness
 ------------------------------
 - Select Infrastructure from the navigation bar.
 - Click the device name in the device list. The device overview page appears.
-- Expand Monitoring Templates, and then select HttpMonitor from the left panel.
-- Create a local copy of the template.
-- Select the newly created local template copy.
+- Select the 'Gear' icon on the bottom panel and select the "Override Template Here" option.
+- Choose "HttpMonitor (/)" template and select "Submit". This will create a local copy of the default HttpMonitor template for only this device.
+- Select the newly created "HttpMonitor (Locally Defined)" template.
 - Select the HttpMonitor data source, and then select View and Edit Details from the Action menu. The Edit Data Source dialog appears.
 - Change data source options as needed, and then click Save.
 
@@ -156,9 +156,9 @@ This procedure allows Zenoss platform to create an event if content at the web p
 
 - Select Infrastructure from the navigation bar.
 - Click the device name in the device list. The device overview page appears.
-- Expand Monitoring Templates, and then select HttpMonitor from the left panel.
-- Create a local copy of the template.
-- Select the newly created local template copy.
+- Select the 'Gear' icon on the bottom panel and select the "Override Template Here" option.
+- Choose "HttpMonitor (/)" template and select "Submit". This will create a local copy of the default HttpMonitor template for only this device.
+- Select the newly created "HttpMonitor (Locally Defined)" template.
 - Select the HttpMonitor data source, and then select View and Edit Details from the Action menu. The Edit Data Source dialog appears.
 - Change data source options as needed, and then click Save.
 
