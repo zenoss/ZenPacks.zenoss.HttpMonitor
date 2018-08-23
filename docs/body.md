@@ -1,32 +1,14 @@
 Background
 ----------
-The ZenPacks.zenoss.HttpMonitor ZenPack monitors the response times of HTTP server connection requests, and determines whether specific content exists on a Web page.
+The ZenPacks.zenoss.HttpMonitor ZenPack monitors the response times of HTTP
+server connection requests, and determines whether specific content exists on a
+Web page.
 
 Support
 -------
-This ZenPack is part of Zenoss Core. Open Source users receive community support for this ZenPack via our online forums. Enterprise support for this ZenPack is provided to Zenoss customers with an active subscription.
-
-Prerequisites
--------------
-<table data-table="resource" style="color: rgb(61, 61, 61); line-height: 175%; background: transparent;">
-    <thead>
-        <tr data-table-header="togglable">
-            <td>PREREQUISITE</td>
-            <td>RESTRICTION</td>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>Product</td>
-            <td>Zenoss platform 4.2.x, 5.x, 6.x</td>
-        </tr>
-        <tr>
-            <td>Required ZenPacks</td>
-            <td>ZenPacks.zenoss.HttpMonitor</td>
-        </tr>
-    </tbody>
-</table>
-
+This ZenPack is part of Zenoss Core. Open Source users receive community support
+for this ZenPack via our online forums. Enterprise support for this ZenPack is
+provided to Zenoss customers with an active subscription.
 
 Gallery
 -------
@@ -60,8 +42,6 @@ Follow these steps to enable monitoring:
 - Expand Monitoring Templates, and then select Device from the left panel.
 - Select Bind Templates from the Action menu. The Bind Templates dialog appears.
 - Add the HttpMonitor template to the list of selected templates, and then click Submit.
-Note: Prior to Zenoss 2.4, this template was not available. If your version is prior to Zenoss 2.4 you must create the template, 
-data source and graphs manually. For more information, refer to Zenoss Service Dynamics Resource Manager Administration.
 
 The HttpMonitor template is added to the list of monitoring templates. You can now begin collecting Web server metrics from the device.
 
@@ -78,7 +58,7 @@ Check for a Specific URL or Specify Security Settings
 
 HttpMonitor Content Checking Data Source Options
 ------------------------------------------------
-<table data-table="resource" style="color: rgb(61, 61, 61); line-height: 175%; background: transparent;">
+<table border=2 data-table="resource" style="color: rgb(61, 61, 61); line-height: 175%; background: transparent;">
     <thead>
         <tr data-table-header="togglable">
             <td>Option</td>
@@ -116,6 +96,10 @@ HttpMonitor Content Checking Data Source Options
                 <u>stickyhostport</u> - Use original hostname and port on redirect
             </td>
         </tr>
+        <tr>
+        <td>Event class</td>
+        <td>(default /Status/HTTP)</td>
+        </tr>
     </tbody>
 </table>
 
@@ -130,7 +114,7 @@ Tuning for Site Responsiveness
 - Select the HttpMonitor data source, and then select View and Edit Details from the Action menu. The Edit Data Source dialog appears.
 - Change data source options as needed, and then click Save.
 
-<table data-table="resource" style="color: rgb(61, 61, 61); line-height: 175%; background: transparent;">
+<table border=3 data-table="resource" style="color: rgb(61, 61, 61); line-height: 175%; background: transparent;">
     <thead>
         <tr data-table-header="togglable">
             <td>Option</td>
@@ -162,8 +146,9 @@ This procedure allows Zenoss platform to create an event if content at the web p
 - Select the HttpMonitor data source, and then select View and Edit Details from the Action menu. The Edit Data Source dialog appears.
 - Change data source options as needed, and then click Save.
 
-HTTPMonitor Content Checking Data Source Options
-<table data-table="resource" style="color: rgb(61, 61, 61); line-height: 175%; background: transparent;">
+**HTTPMonitor Content Checking Data Source Options**
+
+<table border=3 data-table="resource" style="color: rgb(61, 61, 61); line-height: 175%; background: transparent;">
     <thead>
         <tr data-table-header="togglable">
             <td>Option</td>
@@ -189,7 +174,8 @@ HTTPMonitor Content Checking Data Source Options
 
 Daemons
 -------
-<table data-table="resource" style="color: rgb(61, 61, 61); line-height: 175%; background: transparent;">
+
+<table border=3 data-table="resource" style="color: rgb(61, 61, 61); line-height: 175%; background: transparent;">
     <thead>
         <tr data-table-header="togglable">
             <td>Type</td>
@@ -213,12 +199,14 @@ Changes
 - Fix issue with locally defined monitoring templates after upgrade (ZPS-3817)
 - Fix handles bad proxy hostnames (ZPS-3819)
 - Adds unittests for regular expression and redirect behavior
-- Adds `Case sensitive/Invert Expression/Regular Expression` properties into DataSource configuration (ZPS-3867)
-- Adds `Redirect Behavior` options `ok/fail/follow/sticky/stickyport` (ZPS-3867)
+- Adds **`Case sensitive/Invert Expression/Regular Expression`** properties into DataSource configuration (ZPS-3867)
+- Adds **`Redirect Behavior`** options **`ok/fail/follow/sticky/stickyport`** (ZPS-3867)
+- Tested with Zenoss Resource Manager 6.2.0, Zenoss Resource Manager 5.3.3
+
 
 3.0.0
 
-- Removes `Case sensitive/Invert Expression/Regular Expressions` zProperties from DataSource configuration
-- Changes `Redirect Behavior` list to checkbox
-- Removes dependency library `check_http` from Nagios Plugins
+- Removes **`Case sensitive/Invert Expression/Regular Expressions`** zProperties from DataSource configuration
+- Changes **`Redirect Behavior`** list to checkbox
+- Removes dependency library **`check_http`** from Nagios Plugins
 - Adds unittests
