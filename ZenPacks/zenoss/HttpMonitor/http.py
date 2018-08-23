@@ -14,22 +14,68 @@ import time
 from operator import xor
 
 from Products.ZenUtils.IpUtil import isip
-from twisted.internet import reactor
+from twisted.internet import reactor, ssl
 from twisted.internet.endpoints import TCP4ClientEndpoint
 from twisted.names import client, error, dns
 from twisted.python.failure import Failure
 from twisted.web.client import (
-    URI, RedirectAgent, Agent, ProxyAgent, readBody, PartialDownloadError
+    URI, RedirectAgent, Agent, ProxyAgent, readBody, PartialDownloadError, Response
 )
+from twisted.web.iweb import IPolicyForHTTPS
 from twisted.web.http_headers import Headers
+from zope.interface import implementer
 
 log = logging.getLogger('zen.HttpMonitor')
 
+@implementer(IPolicyForHTTPS)
+class NoVerifyContextFactory(object):
+    def creatorForNetloc(self, hostname, port):
+        return ssl.CertificateOptions(verify=False)
+
+class RedirectAgentZ(RedirectAgent):
+    def __init__(self, agent, onRedirect, port=80, proxy=""):
+        RedirectAgent.__init__(self, agent, 20)
+        self._onRedirect = onRedirect
+        self._port = port
+        self._proxy = proxy
+
+    def _resolveLocation(self, requestURI, location):
+        from twisted.web.client import _urljoin
+        from urlparse import urlparse, urlsplit
+        old_url = urlsplit(requestURI)[1].split(":")
+        go_to = urlsplit(location)[1].split(":")
+
+        if self._onRedirect == "sticky":
+            location = location.replace(go_to[0], old_url[0])
+        elif self._onRedirect == "stickyport":
+            def _preparePort(url):
+                urlsplited = urlsplit(url)[1].split(":")
+                scheme = urlsplit(url).scheme \
+                    if urlsplit(url).scheme else "http"
+                if scheme == "http":
+                    url = url.replace(urlsplited[0], urlsplited[0]+":80")
+                elif scheme == "https":
+                    url = url.replace(urlsplited[0], urlsplited[0]+":443")
+                return url
+
+            if len(old_url) != 2:
+                requestURI = _preparePort(requestURI)
+                old_url = urlsplit(requestURI)[1].split(":")
+            if len(go_to) != 2:
+                location = _preparePort(location)
+                go_to = urlsplit(location)[1].split(":")
+            if not self._proxy:
+                location = location.replace(go_to[1], str(self._port))
+            else:
+                location = location.replace(go_to[1], old_url[1])
+        location = _urljoin(requestURI, location)
+        log.debug("Locating to URL: %s" % location)
+        return location
 
 class HTTPMonitor:
     def __init__(
             self, ipAddr, hostname,
-            url="/", port=80, timeout=5, ssl=False, follow=True):
+            url="/", port=80, timeout=5, ssl=False, follow="ok"):
         self._ipAddr = ipAddr
         self._port = port
         self._hostname = hostname
@@ -45,6 +91,10 @@ class HTTPMonitor:
         self._headers = Headers({b"User-Agent": [b"Zenoss HttpMonitor"]})
         self._body = ""
         self._hostnameIp = list()
+        self._regex = ""
+        self._caseSensitive = False
+        self._invert = False
+
 
     def _getIp(self, response):
         if response:
@@ -72,11 +122,13 @@ class HTTPMonitor:
         hasHost = bool(url_data.host)
         hostMatch = url_data.host.endswith(self._hostname)
         ipMatch = self._ipAddr in self._hostnameIp
+        portProtoMatch = self._ssl and int(args['port']) == 443 or \
+                            not self._ssl and int(args['port']) == 80
         if hasHost and xor(hostMatch, ipMatch) or not ipMatch:
             self._proxyIp = self._ipAddr
         # Remove port if default (see RFC 2616, 14.23)
-        if int(args['port']) in (80, 443) or \
-                self._proxyIp and not url_data.scheme:
+        if (int(args['port']) in (80, 443) and portProtoMatch) or \
+                bool(self._proxyIp) and not url_data.scheme:
             self._reqURL = "{scheme}://{hostname}{path}".format(**args)
         else:
             self._reqURL = "{scheme}://{hostname}:{port}{path}".format(**args)
@@ -96,18 +148,27 @@ class HTTPMonitor:
 
     def _agent(self):
         if not self._proxyIp:
-            agent = Agent(self._reactor, connectTimeout=self._timeout)
+            agent = Agent(self._reactor, contextFactory=NoVerifyContextFactory(),
+                            connectTimeout=self._timeout)
         else:
             endpoint = TCP4ClientEndpoint(
                 reactor=self._reactor, host=self._ipAddr, port=self._port,
                 timeout=self._timeout
             )
             agent = ProxyAgent(endpoint)
-        agent = RedirectAgent(agent) if self._follow else agent
+        if self._follow in ('follow', 'sticky', 'stickyport'):
+            agent = RedirectAgentZ(
+                agent, onRedirect=self._follow, port=self._port, proxy=self._proxyIp
+            )
         return agent.request("GET", self._reqURL, self._headers)
 
-    def _bodysize(self, body=""):
-        return sys.getsizeof(body)
+    def _bodysize(self, body="", response=""):
+        headers_len = 0
+        if isinstance(response, Response):
+            headers = response.headers.getAllRawHeaders()
+            for k, v in headers:
+                headers_len += len(k+": ") + len(v[0]+"\r\n")
+        return len(body)+headers_len
 
     def _pageErr(self, failure):
         if failure.type == PartialDownloadError:
@@ -164,13 +225,45 @@ class HTTPMonitor:
         self._response = response
         return readBody(response).addErrback(self._pageErr)
 
-    def _answer(self, body):
+    def _answer(self, body=""):
         res = dict()
-        body = body if not self._body else self._body
+        body = str(body if not self._body else self._body)
         res['body'] = body
         res['headers'] = self._response.headers
         res['code'] = self._response.code
         res['message'] = self._response.phrase
         res['time'] = time.time() - self._startTime
-        res['size'] = self._bodysize(body)
+        res['size'] = self._bodysize(body, self._response)
+        if self._regex:
+            regex = self._checkRegex(body)
+            if regex and regex.get('status', ""):
+                res['msg'] = regex
+
+        if self._follow == "fail":
+            if self._response.code in (301,302,303,307,308):
+                res['msg'] = {'status': 'CRITICAL', 'msg': ''}
+
         return res
+
+    def regex(self, regex, caseSensitive=False, invert=False):
+        self._regex = regex
+        self._caseSensitive = caseSensitive
+        self._invert = invert
+
+    def _checkRegex(self, body=""):
+        import re
+        try:
+            if self._caseSensitive:
+                regex = re.compile(self._regex)
+            else:
+                regex = re.compile(self._regex, re.IGNORECASE)
+        except re.error as err:
+            return {'status': 'CRITICAL', 'msg': 'Could not compile regular expression: '+
+                    repr(self._regex)}
+
+        match = bool(regex.search(body))
+        if (not match and not self._invert) or (match and self._invert):
+            if self._invert:
+                return {'status': 'CRITICAL', 'msg': 'pattern found'}
+            else:
+                return {'status': 'CRITICAL', 'msg': 'pattern not found'}
