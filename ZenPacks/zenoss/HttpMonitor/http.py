@@ -204,11 +204,11 @@ class HTTPMonitor:
         return self.connect()
 
     def connect(self):
-        if not isip(self._ipAddr):
+        if self._ipAddr and not isip(self._ipAddr):
             return client.lookupAddress(self._ipAddr).addCallbacks(
                 self._lookupProxyIp, self._lookupProxyIpErr
             )
-        if not isip(self._hostname):
+        if self._hostname and not isip(self._hostname):
             return client.lookupAddress(self._hostname).addCallbacks(
                 self._getIp, self._lookupErr
             )
