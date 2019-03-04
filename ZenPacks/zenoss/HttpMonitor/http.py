@@ -72,6 +72,33 @@ class RedirectAgentZ(RedirectAgent):
         log.debug("Locating to URL: %s" % location)
         return location
 
+    def _handleRedirect(self, response, method, uri, headers, redirectCount):
+        """
+        Handle a redirect response, checking the number of redirects already
+        followed, and extracting the location header fields.
+        """
+        if redirectCount >= self._redirectLimit:
+            err = error.InfiniteRedirection(
+                response.code,
+                b'Infinite redirection detected',
+                location=uri)
+            raise ResponseFailed([Failure(err)], response)
+        locationHeaders = response.headers.getRawHeaders(b'location', [])
+        if not locationHeaders:
+            err = error.RedirectWithNoLocation(
+                response.code, b'No location header field', uri)
+            raise ResponseFailed([Failure(err)], response)
+        # ZPS-4904
+        location = self._resolveLocation(
+            response.request.absoluteURI, locationHeaders[0])
+        deferred = self._agent.request(method, location, headers)
+        def _chainResponse(newResponse):
+            newResponse.setPreviousResponse(response)
+            return newResponse
+        deferred.addCallback(_chainResponse)
+        return deferred.addCallback(
+            self._handleResponse, method, uri, headers, redirectCount + 1)
+
 class HTTPMonitor:
     def __init__(
             self, ipAddr, hostname,
