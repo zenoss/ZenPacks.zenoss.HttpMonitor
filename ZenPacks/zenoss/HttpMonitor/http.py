@@ -17,7 +17,9 @@ from Products.ZenUtils.IpUtil import isip
 from twisted.internet import reactor, ssl
 from twisted.internet.endpoints import TCP4ClientEndpoint
 from twisted.names import client, error, dns
+from twisted.web import error as httperror
 from twisted.python.failure import Failure
+from twisted.web._newclient import ResponseFailed
 from twisted.web.client import (
     URI, RedirectAgent, Agent, ProxyAgent, readBody, PartialDownloadError, Response
 )
@@ -78,14 +80,14 @@ class RedirectAgentZ(RedirectAgent):
         followed, and extracting the location header fields.
         """
         if redirectCount >= self._redirectLimit:
-            err = error.InfiniteRedirection(
+            err = httperror.InfiniteRedirection(
                 response.code,
                 b'Infinite redirection detected',
                 location=uri)
             raise ResponseFailed([Failure(err)], response)
         locationHeaders = response.headers.getRawHeaders(b'location', [])
         if not locationHeaders:
-            err = error.RedirectWithNoLocation(
+            err = httperror.RedirectWithNoLocation(
                 response.code, b'No location header field', uri)
             raise ResponseFailed([Failure(err)], response)
         # ZPS-4904
