@@ -15,12 +15,15 @@ Gallery
 [defaultConfiguration.png]: images/defaultConfiguration.png "Default Configuration" class=gallery
 [ExampleGraph.png]: images/ExampleGraph.png "Example Graph" class=gallery
 [ProxyConfiguration.png]: images/ProxyConfiguration.png "Proxy Configuration" class=gallery
+[ProxyPort8080.jpg]: images/ProxyPort8080.jpg "Proxy Configuration With Proxy Port 8080" class=gallery
+[ProxyPort8080AndSiteport8888.jpg]: images/ProxyPort8080AndSiteport8888.jpg "Proxy Configuration With Proxy Port 8080 and Web Site Port 8888" class=gallery
 
 
 [![][defaultConfiguration.png]][defaultConfiguration.png]
 [![][ExampleGraph.png]][ExampleGraph.png]
 [![][ProxyConfiguration.png]][ProxyConfiguration.png]
-
+[![][ProxyPort8080.jpg]][ProxyPort8080.jpg]
+[![][ProxyPort8080AndSiteport8888.jpg]][ProxyPort8080AndSiteport8888.jpg]
 
 Features
 --------
@@ -172,6 +175,87 @@ This procedure allows Zenoss platform to create an event if content at the web p
 </table>
 
 
+Configuration to Monitor HTTP Through a Proxy Server
+------------------------------------------
+Example configuration of HTTPMonitor to check a website through a Proxy Server
+when you have a proxy server with an IP address: 192.168.100.10 on port: 8080
+and you have a device on /Devices/HTTP with a name google.com
+
+<table border=2 data-table="resource" style="color: rgb(61, 61, 61); line-height: 175%; background: transparent;">
+    <thead>
+        <tr data-table-header="togglable">
+            <td>Option</td>
+            <td>Example value</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>HostName</td>
+            <td>${dev/id}</td>
+        </tr>
+        <tr>
+            <td>IP Address or Proxy Address</td>
+            <td>192.168.100.10</td>
+        </tr>
+        <tr>
+            <td>Port</td>
+            <td>8080</td>
+        </tr>
+        <tr>
+            <td>URL</td>
+            <td>/</td>
+        </tr>
+        <tr>
+            <td>Proxy User</td>
+            <td>(empty for if proxy anonymous)</td>
+        </tr>
+        <tr>
+            <td>Proxy Password</td>
+            <td>(empty for if proxy anonymous)</td>
+        </tr>
+    </tbody>
+</table>
+
+Example configuration of HTTPMonitor to check a website through a Proxy Server
+when you have a proxy server with an IP address: 192.168.100.10 on port: 8080
+and you have a device on /Devices/HTTP with a name google.com and HTTP port 8888
+
+<table border=2 data-table="resource" style="color: rgb(61, 61, 61); line-height: 175%; background: transparent;">
+    <thead>
+        <tr data-table-header="togglable">
+            <td>Option</td>
+            <td>Example value</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>HostName</td>
+            <td>(empty)</td>
+        </tr>
+        <tr>
+            <td>IP Address or Proxy Address</td>
+            <td>192.168.100.10</td>
+        </tr>
+        <tr>
+            <td>Port</td>
+            <td>8080</td>
+        </tr>
+        <tr>
+            <td>URL</td>
+            <td>http://google.com:8888/</td>
+        </tr>
+        <tr>
+            <td>Proxy User</td>
+            <td>(empty if proxy anonymous)</td>
+        </tr>
+        <tr>
+            <td>Proxy Password</td>
+            <td>(empty if proxy anonymous)</td>
+        </tr>
+    </tbody>
+</table>
+
+
 Daemons
 -------
 
@@ -194,6 +278,12 @@ Daemons
 
 Changes
 -------
+3.0.5
+- Fix infinity redirection in the case with not full URI path in header Location (ZPS-4904
+- Fix issue when HTTPMonitor doesn't check response and doesn't handle either (ZPS-4998)
+- Fix crashes of PythonCollector in the case with blank IP Address or Proxy Address fields (ZPS-4986)
+
+
 3.0.4
 
 - Fix issue with locally defined monitoring templates after upgrade (ZPS-3817)
