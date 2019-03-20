@@ -189,7 +189,7 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
 
         for dp in ds0.points:
             if dp.id in perfData:
-                data['values'][None][dp.id] = perfData[dp.id]
+                data['values'][ds0.component][dp.id] = perfData[dp.id]
 
         eventKey = ds0.eventKey or 'HttpMonitor'
 

@@ -278,10 +278,12 @@ Daemons
 
 Changes
 -------
+
 3.0.5
 - Fix infinity redirection in the case with not full URI path in header Location (ZPS-4904
 - Fix issue when HTTPMonitor doesn't check response and doesn't handle either (ZPS-4998)
 - Fix crashes of PythonCollector in the case with blank IP Address or Proxy Address fields (ZPS-4986)
+- Fix collection of datapoints for component-level datasources (ZPS-5550)
 
 
 3.0.4
