@@ -17,6 +17,7 @@ Gallery
 [ProxyConfiguration.png]: images/ProxyConfiguration.png "Proxy Configuration" class=gallery
 [ProxyPort8080.jpg]: images/ProxyPort8080.jpg "Proxy Configuration With Proxy Port 8080" class=gallery
 [ProxyPort8080AndSiteport8888.jpg]: images/ProxyPort8080AndSiteport8888.jpg "Proxy Configuration With Proxy Port 8080 and Web Site Port 8888" class=gallery
+[proxyWithAuth.png]: images/proxyWithAuth.png "Proxy Configuration With Credentials" class=gallery
 
 
 [![][defaultConfiguration.png]][defaultConfiguration.png]
@@ -24,6 +25,7 @@ Gallery
 [![][ProxyConfiguration.png]][ProxyConfiguration.png]
 [![][ProxyPort8080.jpg]][ProxyPort8080.jpg]
 [![][ProxyPort8080AndSiteport8888.jpg]][ProxyPort8080AndSiteport8888.jpg]
+[![][proxyWithAuth.png]][proxyWithAuth.png]
 
 Features
 --------
@@ -255,6 +257,50 @@ and you have a device on /Devices/HTTP with a name google.com and HTTP port 8888
     </tbody>
 </table>
 
+Example configuration of HTTPMonitor to check a website through a Proxy Server
+when you have a proxy server with an IP address: 192.168.100.127 on port: 8080 and Username: proxy
+, Password: myproxypassword, and you have a device on /Devices/HTTP with a name example.org and HTTP port 8888
+
+<table border=2 data-table="resource" style="color: rgb(61, 61, 61); line-height: 175%; background: transparent;">
+    <thead>
+        <tr data-table-header="togglable">
+            <td>Option</td>
+            <td>Example value</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>HostName</td>
+            <td>(empty)</td>
+        </tr>
+        <tr>
+            <td>IP Address or Proxy Address</td>
+            <td>192.168.100.127</td>
+        </tr>
+        <tr>
+            <td>Port</td>
+            <td>8080</td>
+        </tr>
+        <tr>
+            <td>URL</td>
+            <td>http://example.org:8081/</td>
+        </tr>
+        <tr>
+            <td>Proxy User</td>
+            <td>proxy35</td>
+        </tr>
+        <tr>
+            <td>Proxy Password</td>
+            <td>mypproxpassword</td>
+        </tr>
+    </tbody>
+</table>
+
+Proxy usage logic
+-----------------
+HTTPMonitor uses the address in the `IP Address or Proxy Address` field as a proxy server
+ if the IP address for resolve in the field `URL` and `Host Name` and `IP Address or Proxy Address` do not match
+
 
 Daemons
 -------
@@ -279,11 +325,12 @@ Daemons
 Changes
 -------
 
-3.0.5
+3.1.0
 - Fix infinity redirection in the case with not full URI path in header Location (ZPS-4904
 - Fix issue when HTTPMonitor doesn't check response and doesn't handle either (ZPS-4998)
 - Fix crashes of PythonCollector in the case with blank IP Address or Proxy Address fields (ZPS-4986)
 - Fix collection of datapoints for component-level datasources (ZPS-5550)
+- Provides details on Proxy usage with examples (ZPS-4912)
 
 
 3.0.4
