@@ -17,7 +17,9 @@ from Products.ZenUtils.IpUtil import isip
 from twisted.internet import reactor, ssl
 from twisted.internet.endpoints import TCP4ClientEndpoint
 from twisted.names import client, error, dns
+from twisted.web import error as httperror
 from twisted.python.failure import Failure
+from twisted.web._newclient import ResponseFailed
 from twisted.web.client import (
     URI, RedirectAgent, Agent, ProxyAgent, readBody, PartialDownloadError, Response
 )
@@ -71,6 +73,33 @@ class RedirectAgentZ(RedirectAgent):
         location = _urljoin(requestURI, location)
         log.debug("Locating to URL: %s" % location)
         return location
+
+    def _handleRedirect(self, response, method, uri, headers, redirectCount):
+        """
+        Handle a redirect response, checking the number of redirects already
+        followed, and extracting the location header fields.
+        """
+        if redirectCount >= self._redirectLimit:
+            err = httperror.InfiniteRedirection(
+                response.code,
+                b'Infinite redirection detected',
+                location=uri)
+            raise ResponseFailed([Failure(err)], response)
+        locationHeaders = response.headers.getRawHeaders(b'location', [])
+        if not locationHeaders:
+            err = httperror.RedirectWithNoLocation(
+                response.code, b'No location header field', uri)
+            raise ResponseFailed([Failure(err)], response)
+        # ZPS-4904
+        location = self._resolveLocation(
+            response.request.absoluteURI, locationHeaders[0])
+        deferred = self._agent.request(method, location, headers)
+        def _chainResponse(newResponse):
+            newResponse.setPreviousResponse(response)
+            return newResponse
+        deferred.addCallback(_chainResponse)
+        return deferred.addCallback(
+            self._handleResponse, method, uri, headers, redirectCount + 1)
 
 class HTTPMonitor:
     def __init__(
@@ -204,11 +233,11 @@ class HTTPMonitor:
         return self.connect()
 
     def connect(self):
-        if not isip(self._ipAddr):
+        if self._ipAddr and not isip(self._ipAddr):
             return client.lookupAddress(self._ipAddr).addCallbacks(
                 self._lookupProxyIp, self._lookupProxyIpErr
             )
-        if not isip(self._hostname):
+        if self._hostname and not isip(self._hostname):
             return client.lookupAddress(self._hostname).addCallbacks(
                 self._getIp, self._lookupErr
             )
@@ -239,8 +268,14 @@ class HTTPMonitor:
             if regex and regex.get('status', ""):
                 res['msg'] = regex
 
-        if self._follow == "fail":
-            if self._response.code in (301,302,303,307,308):
+        if self._response.code >= 600 or self._response.code < 100:
+            res['msg'] = {'status': 'CRITICAL', 'msg': 'Invalid Status'}
+        elif self._response.code >= 500:
+            res['msg'] = {'status': 'CRITICAL', 'msg': ''}
+        elif self._response.code >= 400:
+            res['msg'] = {'status': 'WARNING', 'msg': ''}
+        elif self._response.code >= 300:
+            if self._follow == "fail":
                 res['msg'] = {'status': 'CRITICAL', 'msg': ''}
 
         return res

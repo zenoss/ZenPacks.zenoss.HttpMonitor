@@ -153,7 +153,7 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
         basicAuthPass = ds0.params['basicAuthPass']
         proxyAuthUser = ds0.params['proxyAuthUser']
         proxyAuthPassword = ds0.params['proxyAuthPassword']
-        log.info("HTTPMonitor collecting started for a host: {}".format(hostname))
+        log.info("HTTPMonitor collecting started for: {}".format(hostname or ipaddress or url))
         chttp = HTTPMonitor(ipAddr=ipaddress, hostname=hostname, url=url, port=port, timeout=timeout, ssl=useSsl,
                             follow=onRedirect)
         if proxyAuthUser:
@@ -189,7 +189,7 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
 
         for dp in ds0.points:
             if dp.id in perfData:
-                data['values'][None][dp.id] = perfData[dp.id]
+                data['values'][ds0.component][dp.id] = perfData[dp.id]
 
         eventKey = ds0.eventKey or 'HttpMonitor'
 
