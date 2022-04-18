@@ -11,6 +11,9 @@ Put devices in this class to monitor them for Ping, DNS forward lookups, and bas
 <property visible="True" type="boolean" id="zSnmpMonitorIgnore" >
 True
 </property>
+<property visible="False" type="string" id="zHttpMonitorDataSourceSettings" >
+enabled: false
+</property>
 </object>
 <!-- ('', 'zport', 'dmd', 'Devices', 'rrdTemplates', 'HttpMonitor') -->
 <object id='/zport/dmd/Devices/rrdTemplates/HttpMonitor' module='Products.ZenModel.RRDTemplate' class='RRDTemplate'>
