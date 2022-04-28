@@ -26,6 +26,19 @@ from ZenPacks.zenoss.HttpMonitor.http import HTTPMonitor
 log = logging.getLogger('zen.HttpMonitor')
 
 
+class HttpMonitorException(Exception):
+    """
+    The exception which contains HTTP response performance data.
+    Despite error is present, still we have at least HTTP response time and size.
+    """
+    def __init__(self, msg, performance_data=None):
+        super(HttpMonitorException, self).__init__(msg)
+        if performance_data is None:
+            self.performance_data = {}
+        else:
+            self.performance_data = performance_data
+
+
 class HttpMonitorDataSource(PythonDataSource):
     HTTP_MONITOR = 'HttpMonitor'
     ZENPACKID = 'ZenPacks.zenoss.HttpMonitor'
@@ -193,7 +206,7 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
                                                                      results['time'], regex)
 
         if state != "OK":
-            raise Exception(message)
+            raise HttpMonitorException(message, perfData)
 
         log.debug('{} {}'.format(config.id, message))
 
@@ -219,6 +232,9 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
         perfData = {}
         ds0 = config.datasources[0]
         message = '{}'.format(result.getErrorMessage())
+        error_exception = getattr(result, "value", None)
+        if isinstance(error_exception, HttpMonitorException):
+            perfData = error_exception.performance_data
 
         log.error('{} {}'.format(config.id, message))
 
@@ -231,5 +247,9 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
             'severity': ds0.severity,
             'eventClass': ds0.eventClass
         })
+        # Enrich response with Http response performance data: response time and size.
+        for dp in ds0.points:
+            if dp.id in perfData:
+                data['values'][ds0.component][dp.id] = perfData[dp.id]
 
         return data
