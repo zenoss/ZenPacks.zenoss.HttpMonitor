@@ -18,6 +18,7 @@ Gallery
 [ProxyPort8080.jpg]: images/ProxyPort8080.jpg "Proxy Configuration With Proxy Port 8080" class=gallery
 [ProxyPort8080AndSiteport8888.jpg]: images/ProxyPort8080AndSiteport8888.jpg "Proxy Configuration With Proxy Port 8080 and Web Site Port 8888" class=gallery
 [proxyWithAuth.png]: images/proxyWithAuth.png "Proxy Configuration With Credentials" class=gallery
+[severalDatasources.png]: images/severalDatasources.png "Ability to add several HttpMonitor datasources to single device" class=gallery
 
 
 [![][defaultConfiguration.png]][defaultConfiguration.png]
@@ -26,6 +27,7 @@ Gallery
 [![][ProxyPort8080.jpg]][ProxyPort8080.jpg]
 [![][ProxyPort8080AndSiteport8888.jpg]][ProxyPort8080AndSiteport8888.jpg]
 [![][proxyWithAuth.png]][proxyWithAuth.png]
+[![][severalDatasources.png]][severalDatasources.png]
 
 Features
 --------
@@ -50,6 +52,8 @@ Follow these steps to enable monitoring:
 
 The HttpMonitor template is added to the list of monitoring templates. You can now begin collecting Web server metrics from the device.
 
+A couple of HttpMonitor data sources bind to a single device are possible. It can be done by putting them under the current or separate template(s).
+To easily differentiate the events from each of these data sources, theirs "component" field can be populated with unique data.
 
 Check for a Specific URL or Specify Security Settings
 -----------------------------------------------------
@@ -324,6 +328,11 @@ Daemons
 
 Changes
 -------
+
+3.1.0
+
+- Make use of value configured in Datasource "Component" field (ZPS-6133)
+
 
 3.1.0
 
