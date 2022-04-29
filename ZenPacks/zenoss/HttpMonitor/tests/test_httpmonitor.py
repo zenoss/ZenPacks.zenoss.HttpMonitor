@@ -263,7 +263,8 @@ class TestHttpMonitorDataSourcePlugin(ModelTestCase):
             'regex': '',
             'timeout': '60',
             'url': '/',
-            'useSsl': 'False'
+            'useSsl': 'False',
+            'componentString': ''
         }
 
         device_class = self.dmd.Devices.getOrganizer('/HTTP')
