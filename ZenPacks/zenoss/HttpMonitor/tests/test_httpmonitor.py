@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (C) Zenoss, Inc. 2018, all rights reserved.
+# Copyright (C) Zenoss, Inc. 2018-2022, all rights reserved.
 #
 # This content is made available according to terms specified in
 # License.zenoss under the directory where your Zenoss product is installed.
@@ -10,6 +10,8 @@
 from unittest import TestCase
 from twisted.web.client import Agent
 from ZenPacks.zenoss.HttpMonitor.http import HTTPMonitor, RedirectAgentZ
+from ZenPacks.zenoss.HttpMonitor.datasources.HttpMonitorDataSource import HttpMonitorDataSourcePlugin
+from ZenPacks.zenoss.HttpMonitor.tests import ModelTestCase
 
 # ipAddr, hostname, url="/", port=80, timeout=5, ssl=False, follow=True):
 
@@ -239,3 +241,45 @@ class TestHttpMonitor(TestCase):
         hm.makeURL()
         agent = RedirectAgentZ(Agent, onRedirect=hm._follow, port=hm._port, proxy=hm._proxyIp)
         self.assertEqual(agent._resolveLocation(hm._reqURL, location), "http://tester.test/")
+
+
+class TestHttpMonitorDataSourcePlugin(ModelTestCase):
+
+    def test_params(self):
+
+        expected_params = {
+            'basicAuthPass': '',
+            'basicAuthUser': '',
+            'caseSensitive': 'False',
+            'eventClass': '/Status/HTTP',
+            'eventKey': '',
+            'hostname': 'http_device1',
+            'invert': 'False',
+            'ipAddress': '1.2.3.4',
+            'onRedirect': 'follow',
+            'port': '80',
+            'proxyAuthPassword': '',
+            'proxyAuthUser': '',
+            'regex': '',
+            'timeout': '60',
+            'url': '/',
+            'useSsl': 'False',
+            'componentString': ''
+        }
+
+        device_class = self.dmd.Devices.getOrganizer('/HTTP')
+        device = device_class.createInstance(devId='http_device1')
+        device.manageIp = '1.2.3.4'
+
+        http_datasource = None
+
+        templates = device.getRRDTemplates()
+        for template in templates:
+            if template.id == 'HttpMonitor':
+                for datasource in template.datasources():
+                    if datasource.id == 'HttpMonitor':
+                        http_datasource = datasource
+
+        if http_datasource:
+            params = HttpMonitorDataSourcePlugin.params(http_datasource, device)
+            self.assertEqual(params, expected_params)

@@ -15,6 +15,7 @@ Defines datasource for HttpMonitor
 
 import ast
 import logging
+import yaml
 
 from Products.ZenEvents import ZenEventClasses
 from ZenPacks.zenoss.PythonCollector.datasources.PythonDataSource \
@@ -79,53 +80,65 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
     def params(cls, datasource, context):
         params = dict()
 
-        params['hostname'] = datasource.talesEval(
-            datasource.hostname, context)
+        # Settings from datasource
+        component = datasource.component
+        hostname = datasource.hostname
+        ipAddress = datasource.ipAddress
+        port = datasource.port
+        useSsl = datasource.useSsl
+        url = datasource.url
+        basicAuthUser = datasource.basicAuthUser
+        basicAuthPass = datasource.basicAuthPass
+        onRedirect = datasource.onRedirect
+        proxyAuthUser = datasource.proxyAuthUser
+        proxyAuthPassword = datasource.proxyAuthPassword
+        timeout = datasource.timeout
+        regex = datasource.regex
+        caseSensitive = datasource.caseSensitive
+        invert = datasource.invert
 
-        params['ipAddress'] = datasource.talesEval(
-            datasource.ipAddress, context)
+        # Check zHttpMonitorDataSourceSettings zProp. If it is 'enabled' - take values from it.
+        # Fall back to default if particular setting is missed in this config.
+        z_settings_string = getattr(context, 'zHttpMonitorDataSourceSettings', '')
 
-        params['port'] = datasource.talesEval(
-            datasource.port, context)
+        try:
+            z_settings = yaml.load(z_settings_string, Loader=yaml.CLoader)
+        except Exception:
+            z_settings = {}
+        if z_settings.get('enabled'):
+            component = z_settings.get('component', component)
+            hostname = z_settings.get('hostname', hostname)
+            ipAddress = z_settings.get('ipAddress', ipAddress)
+            port = z_settings.get('port', port)
+            useSsl = z_settings.get('useSsl', useSsl)
+            url = z_settings.get('url', url)
+            basicAuthUser = z_settings.get('basicAuthUser', basicAuthUser)
+            basicAuthPass = z_settings.get('basicAuthPass', basicAuthPass)
+            onRedirect = z_settings.get('onRedirect', onRedirect)
+            proxyAuthUser = z_settings.get('proxyAuthUser', proxyAuthUser)
+            proxyAuthPassword = z_settings.get('proxyAuthPassword', proxyAuthPassword)
+            timeout = z_settings.get('timeout', timeout)
+            regex = z_settings.get('regex', regex)
+            caseSensitive = z_settings.get('caseSensitive', caseSensitive)
+            invert = z_settings.get('invert', invert)
 
-        params['useSsl'] = datasource.talesEval(
-            datasource.useSsl, context)
-
-        params['url'] = datasource.talesEval(
-            datasource.url, context)
-
-        params['basicAuthUser'] = datasource.talesEval(
-            datasource.basicAuthUser, context)
-
-        params['basicAuthPass'] = datasource.talesEval(
-            datasource.basicAuthPass, context)
-
-        params['onRedirect'] = datasource.talesEval(
-            datasource.onRedirect, context)
-
-        params['proxyAuthUser'] = datasource.talesEval(
-            datasource.proxyAuthUser, context)
-
-        params['proxyAuthPassword'] = datasource.talesEval(
-            datasource.proxyAuthPassword, context)
-
-        params['eventKey'] = datasource.talesEval(
-            datasource.eventKey, context)
-
-        params['eventClass'] = datasource.talesEval(
-            datasource.eventClass, context)
-
-        params['timeout'] = datasource.talesEval(
-            datasource.timeout, context)
-
-        params['regex'] = datasource.talesEval(
-            datasource.regex, context)
-
-        params['caseSensitive'] = datasource.talesEval(
-            datasource.caseSensitive, context)
-
-        params['invert'] = datasource.talesEval(
-            datasource.invert, context)
+        params['componentString'] = datasource.talesEval(component, context)
+        params['hostname'] = datasource.talesEval(hostname, context)
+        params['ipAddress'] = datasource.talesEval(ipAddress, context)
+        params['port'] = datasource.talesEval(port, context)
+        params['useSsl'] = datasource.talesEval(useSsl, context)
+        params['url'] = datasource.talesEval(url, context)
+        params['basicAuthUser'] = datasource.talesEval(basicAuthUser, context)
+        params['basicAuthPass'] = datasource.talesEval(basicAuthPass, context)
+        params['onRedirect'] = datasource.talesEval(onRedirect, context)
+        params['proxyAuthUser'] = datasource.talesEval(proxyAuthUser, context)
+        params['proxyAuthPassword'] = datasource.talesEval(proxyAuthPassword, context)
+        params['eventKey'] = datasource.talesEval(datasource.eventKey, context)
+        params['eventClass'] = datasource.talesEval(datasource.eventClass, context)
+        params['timeout'] = datasource.talesEval(timeout, context)
+        params['regex'] = datasource.talesEval(regex, context)
+        params['caseSensitive'] = datasource.talesEval(caseSensitive, context)
+        params['invert'] = datasource.talesEval(invert, context)
 
         return params
 
@@ -199,7 +212,8 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
             'message': message,
             'device': config.id,
             'eventClass': ds0.eventClass,
-            'severity': ZenEventClasses.Clear
+            'severity': ZenEventClasses.Clear,
+            'component': ds0.component or ds0.params['componentString']
         })
 
         return data
@@ -219,7 +233,8 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
             'message': message,
             'device': config.id,
             'severity': ds0.severity,
-            'eventClass': ds0.eventClass
+            'eventClass': ds0.eventClass,
+            'component': ds0.component or ds0.params['componentString']
         })
 
         return data
