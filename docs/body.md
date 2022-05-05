@@ -329,10 +329,10 @@ Daemons
 Changes
 -------
 
-3.1.0
+3.1.1
 
 - Make use of value configured in Datasource "Component" field (ZPS-6133)
-
+- Tested with Zenoss Cloud, Zenoss 6.6.0, Zenoss 6.7.0
 
 3.1.0
 
