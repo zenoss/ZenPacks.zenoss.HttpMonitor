@@ -81,6 +81,7 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
         params = dict()
 
         # Settings from datasource
+        component = datasource.component
         hostname = datasource.hostname
         ipAddress = datasource.ipAddress
         port = datasource.port
@@ -105,6 +106,7 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
         except Exception:
             z_settings = {}
         if z_settings.get('enabled'):
+            component = z_settings.get('component', component)
             hostname = z_settings.get('hostname', hostname)
             ipAddress = z_settings.get('ipAddress', ipAddress)
             port = z_settings.get('port', port)
@@ -120,6 +122,7 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
             caseSensitive = z_settings.get('caseSensitive', caseSensitive)
             invert = z_settings.get('invert', invert)
 
+        params['componentString'] = datasource.talesEval(component, context)
         params['hostname'] = datasource.talesEval(hostname, context)
         params['ipAddress'] = datasource.talesEval(ipAddress, context)
         params['port'] = datasource.talesEval(port, context)
@@ -209,7 +212,8 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
             'message': message,
             'device': config.id,
             'eventClass': ds0.eventClass,
-            'severity': ZenEventClasses.Clear
+            'severity': ZenEventClasses.Clear,
+            'component': ds0.component or ds0.params['componentString']
         })
 
         return data
@@ -229,7 +233,8 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
             'message': message,
             'device': config.id,
             'severity': ds0.severity,
-            'eventClass': ds0.eventClass
+            'eventClass': ds0.eventClass,
+            'component': ds0.component or ds0.params['componentString']
         })
 
         return data
