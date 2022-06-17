@@ -99,10 +99,10 @@ class HttpMonitorDataSourcePlugin(PythonDataSourcePlugin):
 
         # Check zHttpMonitorDataSourceSettings zProp. If it is 'enabled' - take values from it.
         # Fall back to default if particular setting is missed in this config.
-        z_settings_string = getattr(context, 'zHttpMonitorDataSourceSettings', '')
+        z_settings_string = getattr(context, 'zHttpMonitorDataSourceSettings', 'enabled: false')
 
         try:
-            z_settings = yaml.load(z_settings_string, Loader=yaml.CLoader)
+            z_settings = yaml.safe_load(z_settings_string)
         except Exception:
             z_settings = {}
         if z_settings.get('enabled'):
